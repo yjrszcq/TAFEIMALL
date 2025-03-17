@@ -1,0 +1,537 @@
+openapi: 3.0.1
+info:
+  title: TAFEIMALL
+  description: ''
+  version: 1.0.0
+tags:
+  - name: 认证与用户管理
+  - name: 用户地址管理
+  - name: 商品浏览与搜索
+  - name: 购物车管理
+  - name: 卖家功能
+paths:
+  /api/auth/register:
+    post:
+      summary: 用户注册
+      deprecated: false
+      description: ''
+      tags:
+        - 认证与用户管理
+      parameters: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserRegistration'
+            examples:
+              '1':
+                value: ''
+                description: ''
+      responses:
+        '201':
+          description: 注册成功
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  userId:
+                    type: string
+                    format: uuid
+                  message:
+                    type: string
+                    examples:
+                      - 注册成功
+          headers: {}
+      security: []
+  /api/auth/login:
+    post:
+      summary: 用户登录
+      deprecated: false
+      description: ''
+      tags:
+        - 认证与用户管理
+      parameters: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                username:
+                  type: string
+                password:
+                  type: string
+              required:
+                - username
+                - password
+            examples:
+              '1':
+                value: ''
+                description: ''
+      responses:
+        '200':
+          description: 登录成功
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  sessionId:
+                    type: string
+                    examples:
+                      - session_token
+                  userId:
+                    type: string
+                    format: uuid
+                  IsMerchant:
+                    type: string
+                    title: 是否为商户账号
+          headers: {}
+      security: []
+  /api/auth/logout:
+    post:
+      summary: 用户登出
+      deprecated: false
+      description: ''
+      tags:
+        - 认证与用户管理
+      parameters: []
+      responses:
+        '200':
+          description: 登出成功
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    examples:
+                      - 登出成功
+          headers: {}
+      security: []
+  /api/users/address:
+    put:
+      summary: 设置收货地址
+      deprecated: false
+      description: ''
+      tags:
+        - 用户地址管理
+      parameters: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AddressUpdate'
+            examples:
+              '1':
+                value: ''
+                description: ''
+      responses:
+        '200':
+          description: 地址更新成功
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    examples:
+                      - 地址更新成功
+          headers: {}
+      security: []
+  /api/products/search:
+    get:
+      summary: 关键词搜索商品
+      deprecated: false
+      description: 当keyword为空时，返回所有商品
+      tags:
+        - 商品浏览与搜索
+      parameters:
+        - name: keyword
+          in: query
+          description: ''
+          required: true
+          schema:
+            type: string
+        - name: page
+          in: query
+          description: ''
+          required: false
+          schema:
+            type: integer
+            default: 1
+        - name: limit
+          in: query
+          description: ''
+          required: false
+          schema:
+            type: integer
+            default: 10
+      responses:
+        '200':
+          description: 搜索成功
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  total:
+                    type: integer
+                    examples:
+                      - 100
+                  results:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        productId:
+                          type: string
+                          format: uuid
+                        name:
+                          type: string
+                        price:
+                          type: number
+                          format: float
+                        thumbnail:
+                          type: string
+                          format: url
+          headers: {}
+      security: []
+  /api/products/{productId}:
+    get:
+      summary: 查看商品详情
+      deprecated: false
+      description: ''
+      tags:
+        - 商品浏览与搜索
+      parameters:
+        - name: productId
+          in: path
+          description: ''
+          required: true
+          example: ''
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: 获取成功
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  productId:
+                    type: string
+                    format: uuid
+                  name:
+                    type: string
+                  description:
+                    type: string
+                  price:
+                    type: number
+                    format: float
+                  stock:
+                    type: integer
+                  isFreeShipping:
+                    type: boolean
+          headers: {}
+      security: []
+  /api/cart:
+    get:
+      summary: 获取购物车内容
+      deprecated: false
+      description: ''
+      tags:
+        - 购物车管理
+      parameters: []
+      responses:
+        '200':
+          description: 获取成功
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  cartId:
+                    type: string
+                    format: uuid
+                  items:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        itemId:
+                          type: string
+                          format: uuid
+                        productId:
+                          type: string
+                          format: uuid
+                        name:
+                          type: string
+                        quantity:
+                          type: integer
+                        price:
+                          type: number
+                          format: float
+                  total:
+                    type: number
+                    format: float
+          headers: {}
+      security: []
+  /api/cart/items:
+    post:
+      summary: 添加商品到购物车
+      deprecated: false
+      description: ''
+      tags:
+        - 购物车管理
+      parameters: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CartItemAdd'
+            examples:
+              '1':
+                value: ''
+                description: ''
+      responses:
+        '201':
+          description: 添加成功
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  itemId:
+                    type: string
+                    format: uuid
+          headers: {}
+      security: []
+  /api/cart/items/{itemId}:
+    put:
+      summary: 修改购物车商品数量
+      deprecated: false
+      description: ''
+      tags:
+        - 购物车管理
+      parameters:
+        - name: itemId
+          in: path
+          description: ''
+          required: true
+          example: ''
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                quantity:
+                  type: integer
+            examples:
+              '1':
+                value: ''
+                description: ''
+      responses:
+        '200':
+          description: 更新成功
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    examples:
+                      - 数量更新成功
+          headers: {}
+      security: []
+    delete:
+      summary: 删除购物车商品
+      deprecated: false
+      description: ''
+      tags:
+        - 购物车管理
+      parameters:
+        - name: itemId
+          in: path
+          description: ''
+          required: true
+          example: ''
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '204':
+          description: 删除成功
+          headers: {}
+      security: []
+  /api/seller/products:
+    post:
+      summary: 上架商品
+      deprecated: false
+      description: ''
+      tags:
+        - 卖家功能
+      parameters: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - name
+                - description
+                - price
+                - stock
+              properties:
+                name:
+                  type: string
+                description:
+                  type: string
+                price:
+                  type: number
+                  format: float
+                stock:
+                  type: integer
+            examples:
+              '1':
+                value: ''
+                description: ''
+      responses:
+        '201':
+          description: 商品上架成功
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  productId:
+                    type: string
+                    format: uuid
+          headers: {}
+      security: []
+  /api/seller/orders/{orderId}:
+    put:
+      summary: 管理订单（卖家视角）
+      deprecated: false
+      description: ''
+      tags:
+        - 卖家功能
+      parameters:
+        - name: orderId
+          in: path
+          description: ''
+          required: true
+          example: ''
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - action
+              properties:
+                action:
+                  type: string
+                  enum:
+                    - ship
+                    - cancel
+                trackingNumber:
+                  type: string
+            examples:
+              '1':
+                value: ''
+                description: ''
+      responses:
+        '200':
+          description: 操作成功
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    examples:
+                      - 已发货
+          headers: {}
+      security: []
+components:
+  schemas:
+    UserRegistration:
+      type: object
+      required:
+        - username
+        - password
+        - email
+      properties:
+        username:
+          type: string
+        password:
+          type: string
+        email:
+          type: string
+    LoginRequest:
+      type: object
+      required:
+        - username
+        - password
+      properties:
+        username:
+          type: string
+        password:
+          type: string
+    AddressUpdate:
+      type: object
+      required:
+        - address
+        - city
+        - postalCode
+      properties:
+        address:
+          type: string
+        city:
+          type: string
+        postalCode:
+          type: string
+    CartItemAdd:
+      type: object
+      required:
+        - productId
+        - quantity
+      properties:
+        productId:
+          type: string
+          format: uuid
+        quantity:
+          type: integer
+    OrderCreate:
+      type: object
+      required:
+        - paymentMethod
+        - shippingAddressId
+      properties:
+        paymentMethod:
+          type: string
+          enum:
+            - credit_card
+            - alipay
+            - wechat_pay
+        shippingAddressId:
+          type: string
+          format: uuid
+  securitySchemes: {}
+servers: []
+security: []
