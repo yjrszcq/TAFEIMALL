@@ -6,6 +6,8 @@ import cn.edu.xidian.tafei_mall.service.ProductService;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import org.springframework.stereotype.Service;
 
+import java.util.zip.DataFormatException;
+
 /**
  * <p>
  * 商品表 服务实现类
@@ -16,5 +18,8 @@ import org.springframework.stereotype.Service;
  */
 @Service
 public class ProductServiceImpl extends ServiceImpl<ProductMapper, Product> implements ProductService {
+    @Override
+    public void addProduct(Product product) throws DataFormatException {
 
+    }
 }
