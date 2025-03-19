@@ -22,13 +22,13 @@ import org.springframework.web.bind.annotation.*;
 public class AuthController {
 
     @PostMapping("/register")
-    public ResponseEntity<?> register(@RequestBody UserRegistration userRegistration) {
+    public ResponseEntity<?> register(@RequestBody UserRegistrationVO userRegistrationVO) {
         // Implement registration logic
         return ResponseEntity.status(HttpStatus.CREATED).body("注册成功");
     }
 
     @PostMapping("/login")
-    public ResponseEntity<?> login(@RequestBody LoginRequest loginRequest) {
+    public ResponseEntity<?> login(@RequestBody LoginRequestVO loginRequestVO) {
         // Implement login logic
         return ResponseEntity.ok("登录成功");
     }

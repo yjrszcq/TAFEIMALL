@@ -2,6 +2,8 @@ package cn.edu.xidian.tafei_mall.controller;
 
 
 import cn.edu.xidian.tafei_mall.model.vo.*;
+import cn.edu.xidian.tafei_mall.service.ProductService;
+import cn.edu.xidian.tafei_mall.service.impl.ProductServiceImpl;
 import org.springframework.http.*;
 import org.springframework.web.bind.annotation.*;
 
@@ -24,8 +26,15 @@ import java.util.Map;
 public class SellerController {
 
     @PostMapping("/products")
-    public ResponseEntity<?> addProduct(@RequestBody Product product) {
+    public ResponseEntity<?> addProduct(@SessionAttribute("seller") String seller, @RequestBody ProductVO productVO) {
         // Implement add product logic
+        cn.edu.xidian.tafei_mall.model.entity.Product entity = new cn.edu.xidian.tafei_mall.model.entity.Product();
+        entity.setName(productVO.getName());
+        entity.setPrice(productVO.getPrice());
+        entity.setStock(productVO.getStock());
+        entity.setSeller(seller);
+        ProductService productService = new ProductServiceImpl();
+        productService.addProduct(productVO);
         return ResponseEntity.status(HttpStatus.CREATED).body("商品上架成功");
     }
 

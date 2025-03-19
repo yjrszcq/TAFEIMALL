@@ -28,7 +28,7 @@ public class CartController {
     }
 
     @PostMapping("/items")
-    public ResponseEntity<?> addItemToCart(@RequestBody CartItemAdd cartItemAdd) {
+    public ResponseEntity<?> addItemToCart(@RequestBody CartItemAddVO cartItemAddVO) {
         // Implement add item to cart logic
         return ResponseEntity.status(HttpStatus.CREATED).body("添加成功");
     }

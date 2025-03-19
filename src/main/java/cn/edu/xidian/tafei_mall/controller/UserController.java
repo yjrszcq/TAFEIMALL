@@ -22,7 +22,7 @@ import org.springframework.web.bind.annotation.*;
 public class UserController {
 
     @PutMapping("/address")
-    public ResponseEntity<?> updateAddress(@RequestBody AddressUpdate addressUpdate) {
+    public ResponseEntity<?> updateAddress(@RequestBody AddressUpdateVO addressUpdate) {
         // Implement address update logic
         return ResponseEntity.ok("地址更新成功");
     }

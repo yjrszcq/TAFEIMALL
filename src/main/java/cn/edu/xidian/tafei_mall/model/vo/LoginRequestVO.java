@@ -1,14 +1,12 @@
 package cn.edu.xidian.tafei_mall.model.vo;
 
+
 import lombok.Data;
 
-
-
 @Data
-public class UserRegistration {
+public class LoginRequestVO {
     private String username;
     private String password;
-    private String email;
 
     // Getters and Setters
 }
