@@ -69,10 +69,9 @@
             <scope>test</scope>
         </dependency>
         <dependency>
-            <groupId>org.mybatis.spring.boot</groupId>
-            <artifactId>mybatis-spring-boot-starter-test</artifactId>
-            <version>3.0.4</version>
-            <scope>test</scope>
+            <groupId>com.baomidou</groupId>
+            <artifactId>mybatis-plus-spring-boot3-starter</artifactId>
+            <version>3.5.10.1</version>
         </dependency>
         <dependency>
             <groupId>com.baomidou</groupId>
@@ -94,6 +93,12 @@
             <artifactId>swagger-annotations</artifactId>
             <version>1.6.15</version>
         </dependency>
+        <dependency>
+            <groupId>com.baomidou</groupId>
+            <artifactId>mybatis-plus-boot-starter-test</artifactId>
+            <version>3.5.10.1</version>
+        </dependency>
+
     </dependencies>
 
     <build>
