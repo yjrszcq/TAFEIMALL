@@ -31,3 +31,8 @@ build/
 
 ### VS Code ###
 .vscode/
+
+
+### 个人配置 ###
+
+!src/main/resources/application.yaml
