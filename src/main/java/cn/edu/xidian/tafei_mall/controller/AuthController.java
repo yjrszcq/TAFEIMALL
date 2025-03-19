@@ -6,6 +6,17 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 
+/**
+*  <p>
+*  这里对应的是/auth路径，用于处理用户的注册、登录、登出请求
+* </p>
+*
+* @auther: shenyaoguan
+*
+* @date: 2025-03-17
+*
+*/
+
 @RestController
 @RequestMapping("/api/auth")
 public class AuthController {

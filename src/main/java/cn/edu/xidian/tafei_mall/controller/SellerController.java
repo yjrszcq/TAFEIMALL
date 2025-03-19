@@ -7,6 +7,18 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
 
+
+/**
+ *  <p>
+ *  这里对应的是/api/seller路径，用于处理卖家的商品上架和订单管理请求
+ * </p>
+ *
+ * @auther: shenyaoguan
+ *
+ * @date: 2025-03-17
+ *
+ */
+
 @RestController
 @RequestMapping("/api/seller")
 public class SellerController {

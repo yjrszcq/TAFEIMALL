@@ -4,6 +4,18 @@ import cn.edu.xidian.tafei_mall.model.vo.*;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+
+/**
+ *  <p>
+ *  这里对应的是/api/products路径，用于处理商品的搜索和详情请求
+ * </p>
+ *
+ * @auther: shenyaoguan
+ *
+ * @date: 2025-03-17
+ *
+ */
+
 @RestController
 @RequestMapping("/api/products")
 public class ProductController {
