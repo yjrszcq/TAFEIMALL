@@ -16,7 +16,7 @@ import java.util.Optional;
  */
 public interface ProductService extends IService<Product> {
 
-    void addProduct(Product product) throws DataFormatException;
+    String addProduct(Product product) throws DataFormatException;
 
     /*
     * 查找商品
