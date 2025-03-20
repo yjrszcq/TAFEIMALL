@@ -5,3 +5,39 @@
 This is the official website of TAFEI MALL. We are an e-commerce platform focusing on clothing. Our goal is to provide high-quality clothing products to consumers, so that everyone can find the clothing that suits them.
 
 ![img.png](doc/resources/img.png)
+
+
+## 项目结构 Project Structure
+
+```
+src
+├── main
+│   ├── java
+│   │   └── cn
+│   │       └── edu
+│   │           └── xidian
+│   │               └── tafei_mall
+│   │                   ├── controller
+│   │                   ├── mapper
+│   │                   ├── model
+│   │                   │   ├── entity
+│   │                   │   └── vo
+│   │                   └── service
+│   │                       └── impl
+│   └── resources
+│       ├── mapper
+│       ├── static
+│       └── templates
+└── test
+    └── java
+        └── cn
+            └── edu
+                └── xidian
+                    └── tafei_mall
+                        └── mappertest
+
+```
+
+
+
+## 项目成员 Project Members
