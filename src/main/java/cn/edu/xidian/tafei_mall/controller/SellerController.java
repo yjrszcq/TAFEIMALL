@@ -59,4 +59,22 @@ public class SellerController {
         // Implement manage order logic
         return ResponseEntity.ok("操作成功");
     }
+
+    @PutMapping("/products/{productId}")
+    public ResponseEntity<?> updateProduct(@PathVariable String productId, @RequestBody ProductVO productVO) {
+        // Implement update product logic
+        return ResponseEntity.ok("更新成功");
+    }
+
+    @DeleteMapping("/products/{productId}")
+    public ResponseEntity<?> deleteProduct(@PathVariable String productId) {
+        // Implement delete product logic
+        return ResponseEntity.noContent().build();
+    }
+
+    @GetMapping("/orders")
+    public ResponseEntity<?> getOrders() {
+        // Implement get orders logic
+        return ResponseEntity.ok("获取成功");
+    }
 }
