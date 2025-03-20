@@ -1,8 +1,14 @@
 package cn.edu.xidian.tafei_mall.controller;
 
+import cn.edu.xidian.tafei_mall.model.entity.Product;
 import cn.edu.xidian.tafei_mall.model.vo.*;
+import cn.edu.xidian.tafei_mall.service.ProductService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.Map;
+import java.util.Optional;
 
 
 /**
@@ -19,16 +25,34 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping("/api/products")
 public class ProductController {
+    @Autowired
+    private ProductService productService;
 
+    /**
+     * 商品搜索接口
+     * @param keyword  搜索关键字（为空时返回所有商品）
+     * @param page     页码（默认1）
+     * @param limit    每页数量（默认10）
+     * @return 搜索结果
+     */
     @GetMapping("/search")
-    public ResponseEntity<?> searchProducts(@RequestParam String keyword, @RequestParam(defaultValue = "1") int page, @RequestParam(defaultValue = "10") int limit) {
-        // Implement product search logic
-        return ResponseEntity.ok("搜索成功");
+    public ResponseEntity<?> searchProducts(
+            @RequestParam(required = false) String keyword,
+            @RequestParam(defaultValue = "1") int page,
+            @RequestParam(defaultValue = "10") int limit) {
+        Map<String, Object> searchResult = productService.searchProducts(keyword, page, limit);
+        return ResponseEntity.ok(searchResult);
     }
 
+    /**
+     * 获取商品详情
+     * @param productId 商品ID
+     * @return 商品详情
+     */
     @GetMapping("/{productId}")
     public ResponseEntity<?> getProductDetails(@PathVariable String productId) {
-        // Implement get product details logic
-        return ResponseEntity.ok("获取成功");
+        Optional<Product> product = productService.getProductById(productId);
+        return product.map(ResponseEntity::ok)
+                .orElseGet(() -> ResponseEntity.notFound().build());
     }
 }
