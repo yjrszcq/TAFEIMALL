@@ -17,4 +17,13 @@ import org.springframework.stereotype.Service;
 @Service
 public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements UserService {
 
+    public String login(User user) {
+        return null;
+    }
+    public User register(User user) {
+        return null;
+    }
+    public boolean logout(User user) {
+        return false;
+    }
 }
