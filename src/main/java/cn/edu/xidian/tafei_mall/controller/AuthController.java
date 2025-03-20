@@ -23,7 +23,10 @@ public class AuthController {
 
     @PostMapping("/register")
     public ResponseEntity<?> register(@RequestBody UserRegistrationVO userRegistrationVO) {
-        // Implement registration logic
+        // Implement register logic
+
+
+
         return ResponseEntity.status(HttpStatus.CREATED).body("注册成功");
     }
 
