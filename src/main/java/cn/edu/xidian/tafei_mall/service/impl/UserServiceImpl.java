@@ -64,4 +64,14 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
             return false;
         }
     }
+
+    @Override
+    public User getUserInfo(String sessionId) {
+        Session session = sessionMapper.selectOne(new QueryWrapper<Session>().like("session_token", sessionId));
+        if(session != null){
+            return userMapper.selectOne(new QueryWrapper<User>().like("user_id", session.getUserId()));
+        }else{
+            return null;
+        }
+    }
 }

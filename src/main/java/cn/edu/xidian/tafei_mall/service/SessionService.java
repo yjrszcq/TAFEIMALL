@@ -17,4 +17,5 @@ public interface SessionService extends IService<Session> {
      * 创建会话
      */
     String createSession(User user);
+
 }

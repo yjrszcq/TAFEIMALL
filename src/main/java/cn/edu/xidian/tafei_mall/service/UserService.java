@@ -28,4 +28,9 @@ public interface UserService extends IService<User> {
      * 登出
      */
     boolean logout(String sessionId);
+
+    /**
+     * 获取用户信息
+     */
+    User getUserInfo(String sessionId);
 }
