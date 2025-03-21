@@ -1,7 +1,12 @@
 package cn.edu.xidian.tafei_mall.controller;
 
 import cn.edu.xidian.tafei_mall.model.vo.*;
+import cn.edu.xidian.tafei_mall.model.vo.Response.Address.AddressResponse;
+import cn.edu.xidian.tafei_mall.service.AddressService;
 import cn.edu.xidian.tafei_mall.service.UserService;
+import io.swagger.annotations.ResponseHeader;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -21,10 +26,16 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping("/api/users")
 public class UserController {
+    @Autowired
+    private AddressService addressService;
 
     @PutMapping("/address")
-    public ResponseEntity<?> updateAddress(@RequestBody AddressUpdateVO addressUpdate) {
-        // Implement address update logic
-        return ResponseEntity.ok("地址更新成功");
+    public ResponseEntity<?> updateAddress(@RequestBody AddressUpdateVO addressUpdate, @RequestHeader("Session-Id") String sessionId){
+        try{
+            addressService.updateAddress(addressUpdate, sessionId);
+            return new ResponseEntity<>(new AddressResponse("地址更新成功"), HttpStatus.OK);
+        }catch (Exception e) {
+            return new ResponseEntity<>(new AddressResponse("地址更新失败"), HttpStatus.BAD_REQUEST);
+        }
     }
 }
