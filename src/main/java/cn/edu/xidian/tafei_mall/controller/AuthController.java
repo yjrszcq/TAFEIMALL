@@ -1,6 +1,10 @@
 package cn.edu.xidian.tafei_mall.controller;
 
+import cn.edu.xidian.tafei_mall.model.entity.Response.Auth.RegisterResponse;
+import cn.edu.xidian.tafei_mall.model.entity.User;
 import cn.edu.xidian.tafei_mall.model.vo.*;
+import cn.edu.xidian.tafei_mall.service.UserService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -20,14 +24,13 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping("/api/auth")
 public class AuthController {
+    @Autowired
+    private UserService userService;
 
     @PostMapping("/register")
     public ResponseEntity<?> register(@RequestBody UserRegistrationVO userRegistrationVO) {
-        // Implement register logic
-
-
-
-        return ResponseEntity.status(HttpStatus.CREATED).body("注册成功");
+        User user = userService.register(userRegistrationVO);
+        return new ResponseEntity<>(new RegisterResponse(user.getUserId(),"注册成功"),HttpStatus.CREATED);
     }
 
     @PostMapping("/login")

@@ -1,6 +1,7 @@
 package cn.edu.xidian.tafei_mall.controller;
 
 import cn.edu.xidian.tafei_mall.model.vo.*;
+import cn.edu.xidian.tafei_mall.service.UserService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 

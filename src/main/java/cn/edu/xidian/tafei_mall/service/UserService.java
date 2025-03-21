@@ -1,6 +1,7 @@
 package cn.edu.xidian.tafei_mall.service;
 
 import cn.edu.xidian.tafei_mall.model.entity.User;
+import cn.edu.xidian.tafei_mall.model.vo.UserRegistrationVO;
 import com.baomidou.mybatisplus.extension.service.IService;
 
 /**
@@ -13,6 +14,6 @@ import com.baomidou.mybatisplus.extension.service.IService;
  */
 public interface UserService extends IService<User> {
     String login(User user);
-    User register(User user);
+    User register(UserRegistrationVO userRegistrationVO);
     boolean logout(User user);
 }

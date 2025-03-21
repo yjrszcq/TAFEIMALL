@@ -46,7 +46,7 @@ public class ProductServiceImpl extends ServiceImpl<ProductMapper, Product> impl
 
         // 如果 keyword 不是空，则执行模糊查询
         if (keyword != null && !keyword.trim().isEmpty()) {
-            queryWrapper.like(Product::getName, keyword);
+            queryWrapper.like( Product::getName, keyword);
         }
 
         // 分页查询
