@@ -1,4 +1,4 @@
-package cn.edu.xidian.tafei_mall.model.entity.Response.Auth;
+package cn.edu.xidian.tafei_mall.model.vo.Response.Auth;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.Getter;

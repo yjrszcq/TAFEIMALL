@@ -1,6 +1,6 @@
 package cn.edu.xidian.tafei_mall.controller;
 
-import cn.edu.xidian.tafei_mall.model.entity.Response.Auth.RegisterResponse;
+import cn.edu.xidian.tafei_mall.model.vo.Response.Auth.RegisterResponse;
 import cn.edu.xidian.tafei_mall.model.entity.User;
 import cn.edu.xidian.tafei_mall.model.vo.*;
 import cn.edu.xidian.tafei_mall.service.UserService;
