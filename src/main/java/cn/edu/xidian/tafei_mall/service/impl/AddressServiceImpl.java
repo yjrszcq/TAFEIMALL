@@ -4,6 +4,7 @@ import cn.edu.xidian.tafei_mall.model.entity.Address;
 import cn.edu.xidian.tafei_mall.mapper.AddressMapper;
 import cn.edu.xidian.tafei_mall.model.entity.User;
 import cn.edu.xidian.tafei_mall.model.vo.AddressUpdateVO;
+import cn.edu.xidian.tafei_mall.model.vo.Response.Address.getAddressResponse;
 import cn.edu.xidian.tafei_mall.service.AddressService;
 import cn.edu.xidian.tafei_mall.service.UserService;
 import cn.hutool.core.bean.BeanUtil;
@@ -31,11 +32,34 @@ public class AddressServiceImpl extends ServiceImpl<AddressMapper, Address> impl
     private UserService userService;
 
     @Override
-    public void updateAddress(AddressUpdateVO addressUpdateVO,String sessionId){
+    public void addAddress(AddressUpdateVO addressUpdateVO, String sessionId){
         Address address = BeanUtil.toBean(addressUpdateVO, Address.class);
         User user=userService.getUserInfo(sessionId);
         address.setUserId(user.getUserId());
         address.setAddressId(String.valueOf(UUID.randomUUID()));
         addressMapper.insert(address);
+    }
+
+    @Override
+    public getAddressResponse getAddress(String sessionId){
+        User user=userService.getUserInfo(sessionId);
+        Address address=addressMapper.selectById(user.getUserId());
+        getAddressResponse getAddressResponse=new getAddressResponse();
+        BeanUtil.copyProperties(address,getAddressResponse);
+        return getAddressResponse;
+    }
+
+    @Override
+    public void updateAddress(AddressUpdateVO addressUpdateVO, String sessionId){
+        User user=userService.getUserInfo(sessionId);
+        Address address=addressMapper.selectById(user.getUserId());
+        BeanUtil.copyProperties(addressUpdateVO,address);
+        addressMapper.updateById(address);
+    }
+
+    @Override
+    public void deleteAddress(Integer addressId, String sessionId){
+        User user=userService.getUserInfo(sessionId);
+        addressMapper.deleteById(user.getUserId());
     }
 }
