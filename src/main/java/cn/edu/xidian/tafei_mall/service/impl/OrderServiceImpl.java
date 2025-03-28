@@ -75,7 +75,7 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
      * @return 订单ID
      */
     @Override
-    public String createOrder(String cartId, String addressId) {
+    public String createOrder(String cartId, Order order) {
         // 获取购物车
         List<CartItem> cartItems = cartItemService.getCartItemsByCartId(cartId);
         if (cartItems.isEmpty()) {
@@ -83,7 +83,6 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
         }
 
         // 创建订单
-        Order order = new Order();
         order.setUserId(cartService.getCartById(cartId).getUserId());
         order.setStatus("待支付");
         order.setShippingAddressId(addressId);
@@ -124,8 +123,8 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
      * @return 更新后的订单
      */
     @Override
-    public Order updateOrderStatus(String orderId, Map<String, String> status) {
-        switch(status.get("status")){
+    public Order updateOrderStatus(String orderId, Order tempOrder) {
+        switch(tempOrder.getStatus()){
             case "已取消": {
                 // 验证订单状态是否可以取消
                 Order order = orderMapper.selectById(orderId);
@@ -146,7 +145,7 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
                 }
                 // 更改订单状态为已支付
                 order.setStatus("已支付");
-                // order.setPaymentMethod(status.get("paymentMethod")); // 添加支付模块后使用
+                // order.setPaymentMethod(tempOrder.getPaymentMethod()); // 添加支付模块后使用
 
                 // 清空购物车
                 Cart cart = cartService.getCartByUserId(order.getUserId());
@@ -210,9 +209,9 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
      */
     @Override
     public boolean cancelOrder(String orderId) {
-        Map<String, String> status = new HashMap<>();
-        status.put("status", "已取消");
-        Order order = updateOrderStatus(orderId, status);
+        Order tempOrder = new Order();
+        tempOrder.setStatus("已取消");
+        Order order = updateOrderStatus(orderId, tempOrder);
         return order.getOrderId() != null;
     }
 }

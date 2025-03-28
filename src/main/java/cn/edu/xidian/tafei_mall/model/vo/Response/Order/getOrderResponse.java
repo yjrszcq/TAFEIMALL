@@ -27,15 +27,15 @@ class Order {
     private final String userId;
     private final BigDecimal totalAmount;
     private final String paymentMethod;
-    private final String addressId;
-    private final String orderStatus;
+    private final String shippingAddressId;
+    private final String status;
 
-    public Order(String orderId, String userId, BigDecimal totalAmount, String paymentMethod, String addressId, String orderStatus) {
+    public Order(String orderId, String userId, BigDecimal totalAmount, String paymentMethod, String shippingAddressId, String status) {
         this.orderId = orderId;
         this.userId = userId;
         this.totalAmount = totalAmount;
         this.paymentMethod = paymentMethod;
-        this.addressId = addressId;
-        this.orderStatus = orderStatus;
+        this.shippingAddressId = shippingAddressId;
+        this.status = status;
     }
 }

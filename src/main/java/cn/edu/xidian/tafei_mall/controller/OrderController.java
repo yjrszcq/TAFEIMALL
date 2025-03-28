@@ -3,8 +3,11 @@ package cn.edu.xidian.tafei_mall.controller;
 
 import cn.edu.xidian.tafei_mall.model.entity.Order;
 import cn.edu.xidian.tafei_mall.model.entity.OrderItem;
+import cn.edu.xidian.tafei_mall.model.vo.OrderCreateVO;
+import cn.edu.xidian.tafei_mall.model.vo.OrderUpdateVO;
 import cn.edu.xidian.tafei_mall.service.OrderItemService;
 import cn.edu.xidian.tafei_mall.service.OrderService;
+import cn.hutool.core.bean.BeanUtil;
 import io.swagger.annotations.ApiKeyAuthDefinition;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -118,13 +121,14 @@ public class OrderController {
     /**
      * 创建订单
      * @param cartId 购物车ID
-     * @param addressId 地址ID
+     * @param orderCreateVO 地址ID
      * @return 订单ID
      */
     @PostMapping("/create/{cartId}")
-    public ResponseEntity<?> createOrder(@PathVariable String cartId, @RequestBody String addressId) {
+    public ResponseEntity<?> createOrder(@PathVariable String cartId, @RequestBody OrderCreateVO orderCreateVO) {
         try{
-            String orderId = orderService.createOrder(cartId, addressId);
+            Order order = BeanUtil.toBean(orderCreateVO, Order.class);
+            String orderId = orderService.createOrder(cartId, order);
             return ResponseEntity.created(URI.create("")).body(orderId);
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(e.getMessage());
@@ -133,13 +137,14 @@ public class OrderController {
     /**
      * 更新订单状态
      * @param orderId 订单ID
-     * @param status 状态信息(可附带备注，比如支付方式)
+     * @param orderUpdateVO 状态信息
      * @return 更新后的订单
      */
     @PutMapping("/update/{orderId}")
-    public ResponseEntity<?> updateOrderStatus(@PathVariable String orderId, @RequestBody Map<String, String> status) {
+    public ResponseEntity<?> updateOrderStatus(@PathVariable String orderId, @RequestBody OrderUpdateVO orderUpdateVO) {
         try{
-            Order order = orderService.updateOrderStatus(orderId, status);
+            Order order = BeanUtil.toBean(orderUpdateVO, Order.class);
+            order = orderService.updateOrderStatus(orderId, order);
             if (order == null) {
                 return ResponseEntity.notFound().build();
             }

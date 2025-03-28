@@ -17,7 +17,7 @@ import java.util.Map;
 public interface OrderService extends IService<Order> {
     List<Order> getOrderById(String sessionId, String OrderId);
     List<Order> getOrderByAdminById(String sessionId);
-    String createOrder(String cartId, String addressId);
-    Order updateOrderStatus(String orderId, Map<String, String> status);
+    String createOrder(String cartId, Order order);
+    Order updateOrderStatus(String orderId, Order order);
     boolean cancelOrder(String orderId);
 }
