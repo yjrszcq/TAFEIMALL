@@ -1,10 +1,8 @@
 package cn.edu.xidian.tafei_mall.model.vo.Response.Order;
 
-import cn.edu.xidian.tafei_mall.model.entity.OrderItem;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.Getter;
 
-import java.util.ArrayList;
 import java.util.List;
 
 @Getter

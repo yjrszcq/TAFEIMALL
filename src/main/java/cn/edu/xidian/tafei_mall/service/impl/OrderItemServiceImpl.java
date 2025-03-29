@@ -1,21 +1,14 @@
 package cn.edu.xidian.tafei_mall.service.impl;
 
-import cn.edu.xidian.tafei_mall.mapper.OrderMapper;
-import cn.edu.xidian.tafei_mall.model.entity.Order;
 import cn.edu.xidian.tafei_mall.model.entity.OrderItem;
 import cn.edu.xidian.tafei_mall.mapper.OrderItemMapper;
-import cn.edu.xidian.tafei_mall.model.entity.User;
 import cn.edu.xidian.tafei_mall.service.OrderItemService;
-import cn.edu.xidian.tafei_mall.service.OrderService;
-import cn.edu.xidian.tafei_mall.service.UserService;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 
 /**
  * <p>

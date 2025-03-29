@@ -2,7 +2,6 @@ package cn.edu.xidian.tafei_mall.service.impl;
 
 import cn.edu.xidian.tafei_mall.mapper.CartItemMapper;
 import cn.edu.xidian.tafei_mall.mapper.CartMapper;
-import cn.edu.xidian.tafei_mall.mapper.OrderItemMapper;
 import cn.edu.xidian.tafei_mall.model.entity.*;
 import cn.edu.xidian.tafei_mall.mapper.OrderMapper;
 import cn.edu.xidian.tafei_mall.model.vo.OrderCreateVO;
