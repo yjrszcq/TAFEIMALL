@@ -10,11 +10,9 @@ import java.util.List;
 @Getter
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class getOrderItemResponse {
-    private final List<OrderItemResponse> items = new ArrayList<>();
+    private final List<OrderItemResponse> items;
 
-    public getOrderItemResponse(List<OrderItem> items) {
-        for (OrderItem item : items) {
-            this.items.add(new OrderItemResponse(item.getOrderItemId(), item.getOrderId(), item.getProductId(), item.getQuantity(), item.getPrice()));
-        }
+    public getOrderItemResponse(List<OrderItemResponse> items) {
+        this.items = items;
     }
 }
