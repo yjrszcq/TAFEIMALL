@@ -15,7 +15,7 @@ import com.baomidou.mybatisplus.extension.service.IService;
  */
 public interface OrderService extends IService<Order> {
     // Server层中，同层调用，不需要暴露给上层
-    Order getOrderById(String orderId); // 内部使用
+    Order getOrderById(String orderId);
     // 买家
     getOrderResponse getOrderByCustomer(String userId);
     getOrderResponse getOrderByCustomer(String OrderId, String userId);
