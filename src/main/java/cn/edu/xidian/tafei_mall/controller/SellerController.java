@@ -3,6 +3,7 @@ package cn.edu.xidian.tafei_mall.controller;
 
 import cn.edu.xidian.tafei_mall.model.entity.User;
 import cn.edu.xidian.tafei_mall.model.vo.*;
+import cn.edu.xidian.tafei_mall.model.vo.Response.Order.MessageResponse;
 import cn.edu.xidian.tafei_mall.model.vo.Response.Order.getOrderResponse;
 import cn.edu.xidian.tafei_mall.model.vo.Response.Seller.addProductResponse;
 import cn.edu.xidian.tafei_mall.model.vo.Response.Seller.getProductResponse;
@@ -110,16 +111,16 @@ public class SellerController {
     public ResponseEntity<?> getOrders(@RequestHeader("Session-Id") String sessionId) {
         try{
             if (sessionId == null) {
-                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+                return new ResponseEntity<>(new MessageResponse("未登录"), HttpStatus.UNAUTHORIZED);
             }
             User user = userService.getUserInfo(sessionId);
             if (user == null) {
-                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+                return new ResponseEntity<>(new MessageResponse("用户不存在"), HttpStatus.UNAUTHORIZED);
             }
             getOrderResponse response = orderService.getOrderBySeller(user.getUserId());
             return ResponseEntity.ok().body(response);
         } catch (Exception e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
+            return new ResponseEntity<>(new MessageResponse(e.getMessage()), HttpStatus.BAD_REQUEST);
         }
     }
 }

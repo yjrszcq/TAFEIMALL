@@ -3,6 +3,8 @@ package cn.edu.xidian.tafei_mall.controller;
 
 import cn.edu.xidian.tafei_mall.model.entity.User;
 import cn.edu.xidian.tafei_mall.model.vo.OrderCreateVO;
+import cn.edu.xidian.tafei_mall.model.vo.Response.Order.IdResponse;
+import cn.edu.xidian.tafei_mall.model.vo.Response.Order.MessageResponse;
 import cn.edu.xidian.tafei_mall.model.vo.Response.Order.getOrderResponse;
 import cn.edu.xidian.tafei_mall.service.OrderService;
 import cn.edu.xidian.tafei_mall.service.UserService;
@@ -34,21 +36,21 @@ public class OrderController {
                                          @RequestParam(required = false, defaultValue = "-1") String orderId) {
         try{
             if (sessionId == null) {
-                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+                return new ResponseEntity<>(new MessageResponse("未登录"), HttpStatus.UNAUTHORIZED);
             }
             User user = userService.getUserInfo(sessionId);
             if (user == null) {
-                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+                return new ResponseEntity<>(new MessageResponse("用户不存在"), HttpStatus.UNAUTHORIZED);
             }
             if (orderId.equals("-1")) {
                 getOrderResponse orders = orderService.getOrderByCustomer(user.getUserId());
-                return ResponseEntity.ok().body(orders);
+                return new ResponseEntity<>(orders, HttpStatus.OK);
             } else {
                 getOrderResponse orders = orderService.getOrderByCustomer(orderId, user.getUserId());
-                return ResponseEntity.ok().body(orders);
+                return new ResponseEntity<>(orders, HttpStatus.OK);
             }
         } catch (Exception e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
+            return new ResponseEntity<>(new MessageResponse(e.getMessage()), HttpStatus.BAD_REQUEST);
         }
     }
     /**
@@ -61,16 +63,16 @@ public class OrderController {
     public ResponseEntity<?> createOrder(@RequestHeader("Session-Id") String sessionId, @PathVariable String cartId, @RequestBody OrderCreateVO orderCreateVO) {
         try{
             if (sessionId == null) {
-                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+                return new ResponseEntity<>(new MessageResponse("未登录"), HttpStatus.UNAUTHORIZED);
             }
             User user = userService.getUserInfo(sessionId);
             if (user == null) {
-                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+                return new ResponseEntity<>(new MessageResponse("用户不存在"), HttpStatus.UNAUTHORIZED);
             }
             String orderId = orderService.createOrder(cartId, orderCreateVO, user.getUserId());
             return ResponseEntity.created(URI.create("Order")).body(orderId);
         } catch (Exception e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
+            return new ResponseEntity<>(new MessageResponse(e.getMessage()), HttpStatus.BAD_REQUEST);
         }
     }
     /**
@@ -82,19 +84,19 @@ public class OrderController {
     public ResponseEntity<?> cancelOrder(@RequestHeader("Session-Id") String sessionId, @PathVariable String orderId) {
         try{
             if (sessionId == null) {
-                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+                return new ResponseEntity<>(new MessageResponse("未登录"), HttpStatus.UNAUTHORIZED);
             }
             User user = userService.getUserInfo(sessionId);
             if (user == null) {
-                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+                return new ResponseEntity<>(new MessageResponse("用户不存在"), HttpStatus.UNAUTHORIZED);
             }
             boolean flag = orderService.cancelOrder(orderId, user.getUserId());
             if (!flag) {
-                return ResponseEntity.badRequest().build();
+                return new ResponseEntity<>(new MessageResponse("取消失败"), HttpStatus.BAD_REQUEST);
             }
             return ResponseEntity.ok().body(orderId);
         } catch (Exception e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
+            return new ResponseEntity<>(new IdResponse(orderId), HttpStatus.OK);
         }
     }
 }
