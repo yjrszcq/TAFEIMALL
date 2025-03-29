@@ -61,9 +61,12 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
             }
             return new getOrderRespnose(orderDetailResponses);
         } else { // 获取指定订单
-            Order order = orderMapper.selectList(new QueryWrapper<Order>().eq("order_id", orderId).eq("user_id", userId)).get(0);
+            Order order = orderMapper.selectOne(new QueryWrapper<Order>().eq("order_id", orderId));
             if (order == null) {
                 return new getOrderRespnose(new ArrayList<>());
+            }
+            if (!order.getUserId().equals(userId)) {
+                throw new IllegalArgumentException("Order does not belong to current user");
             }
             // 获取订单项
             List<OrderDetailResponse> orderDetailResponses = new ArrayList<>();
