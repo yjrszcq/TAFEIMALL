@@ -32,11 +32,17 @@ public class OrderItemServiceImpl extends ServiceImpl<OrderItemMapper, OrderItem
 
     @Override
     public OrderItem getOrderItemById(String orderItemId){
-        return orderItemMapper.selectOne(new QueryWrapper<OrderItem>().eq("order_item_id", orderItemId));
+        return orderItemMapper.selectById(orderItemId);
     }
 
     @Override
     public List<OrderItem> getOrderItemByOrderId(String orderId){
         return orderItemMapper.selectList(new QueryWrapper<OrderItem>().eq("order_id", orderId));
+    }
+
+    @Override
+    public String addOrderItem(OrderItem orderItem){
+        orderItemMapper.insert(orderItem);
+        return orderItem.getOrderItemId();
     }
 }

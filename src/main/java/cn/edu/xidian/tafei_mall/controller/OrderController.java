@@ -1,11 +1,9 @@
 package cn.edu.xidian.tafei_mall.controller;
 
 
-import cn.edu.xidian.tafei_mall.model.entity.Order;
 import cn.edu.xidian.tafei_mall.model.entity.User;
 import cn.edu.xidian.tafei_mall.model.vo.OrderCreateVO;
-import cn.edu.xidian.tafei_mall.model.vo.Response.Order.getOrderRespnose;
-import cn.edu.xidian.tafei_mall.service.OrderItemService;
+import cn.edu.xidian.tafei_mall.model.vo.Response.Order.getOrderResponse;
 import cn.edu.xidian.tafei_mall.service.OrderService;
 import cn.edu.xidian.tafei_mall.service.UserService;
 import io.swagger.annotations.ApiKeyAuthDefinition;
@@ -15,7 +13,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.net.URI;
-import java.util.List;
 
 
 @ApiKeyAuthDefinition(key = "Session-ID", in = ApiKeyAuthDefinition.ApiKeyLocation.HEADER, name = "Session-ID")
@@ -43,8 +40,13 @@ public class OrderController {
             if (user == null) {
                 return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
             }
-            getOrderRespnose orders = orderService.getOrderById(orderId, user.getUserId());
-            return ResponseEntity.ok(orders);
+            if (orderId.equals("-1")) {
+                getOrderResponse orders = orderService.getOrderByCustomer(user.getUserId());
+                return ResponseEntity.ok().body(orders);
+            } else {
+                getOrderResponse orders = orderService.getOrderByCustomer(orderId, user.getUserId());
+                return ResponseEntity.ok().body(orders);
+            }
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
@@ -90,7 +92,7 @@ public class OrderController {
             if (!flag) {
                 return ResponseEntity.notFound().build();
             }
-            return ResponseEntity.ok(orderId);
+            return ResponseEntity.ok().body(orderId);
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         }

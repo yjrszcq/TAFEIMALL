@@ -1,12 +1,14 @@
 package cn.edu.xidian.tafei_mall.service.impl;
 
+import cn.edu.xidian.tafei_mall.mapper.CartItemMapper;
+import cn.edu.xidian.tafei_mall.mapper.CartMapper;
 import cn.edu.xidian.tafei_mall.mapper.OrderItemMapper;
 import cn.edu.xidian.tafei_mall.model.entity.*;
 import cn.edu.xidian.tafei_mall.mapper.OrderMapper;
 import cn.edu.xidian.tafei_mall.model.vo.OrderCreateVO;
 import cn.edu.xidian.tafei_mall.model.vo.Response.Order.OrderDetailResponse;
 import cn.edu.xidian.tafei_mall.model.vo.Response.Order.getOrderItemResponse;
-import cn.edu.xidian.tafei_mall.model.vo.Response.Order.getOrderRespnose;
+import cn.edu.xidian.tafei_mall.model.vo.Response.Order.getOrderResponse;
 import cn.edu.xidian.tafei_mall.service.*;
 import cn.hutool.core.bean.BeanUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
@@ -30,50 +32,70 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
     @Autowired
     private OrderMapper orderMapper;
     @Autowired
-    private OrderItemMapper orderItemMapper;
+    private OrderItemService orderItemService;
     @Autowired
     private ProductService productService;
+    /* 由于Service层的Cart不完整，暂时用Mapper层的代替
     @Autowired
     private CartService cartService;
     @Autowired
     private CartItemService cartItemService;
+     */
     @Autowired
-    private OrderItemService orderItemService;
+    private CartMapper cartMapper;
+    @Autowired
+    private CartItemMapper cartItemMapper;
 
     /**
-     * 获取订单项
+     * 获取订单(内部使用)
      * @param orderId 订单ID
-     * @param userId 用户ID
      * @return 订单项列表
      */
     @Override
-    public getOrderRespnose getOrderById(String orderId, String userId){
-        if (Objects.equals(orderId, "-1") || orderId == null) { // 获取所有订单
-            List <Order> orders = orderMapper.selectList(new QueryWrapper<Order>().eq("user_id", userId));
-            if (orders.isEmpty()) {
-                return new getOrderRespnose(new ArrayList<>());
-            }
-            // 获取订单项
-            List<OrderDetailResponse> orderDetailResponses = new ArrayList<>();
-            for (Order order : orders) {
-                List<OrderItem> orderItems = orderItemService.getOrderItemByOrderId(orderId);
-                orderDetailResponses.add(new OrderDetailResponse(order.getOrderId(), order.getUserId(), order.getTotalAmount(), order.getPaymentMethod(), order.getShippingAddressId(), order.getStatus(), new getOrderItemResponse(orderItems)));
-            }
-            return new getOrderRespnose(orderDetailResponses);
-        } else { // 获取指定订单
-            Order order = orderMapper.selectOne(new QueryWrapper<Order>().eq("order_id", orderId));
-            if (order == null) {
-                return new getOrderRespnose(new ArrayList<>());
-            }
-            if (!order.getUserId().equals(userId)) {
-                throw new IllegalArgumentException("Order does not belong to current user");
-            }
-            // 获取订单项
-            List<OrderDetailResponse> orderDetailResponses = new ArrayList<>();
-            List<OrderItem> orderItems = orderItemService.getOrderItemByOrderId(orderId);
-            orderDetailResponses.add(new OrderDetailResponse(order.getOrderId(), order.getUserId(), order.getTotalAmount(), order.getPaymentMethod(), order.getShippingAddressId(), order.getStatus(), new getOrderItemResponse(orderItems)));
-            return new getOrderRespnose(orderDetailResponses);
+    public Order getOrderById(String orderId){
+        return orderMapper.selectById(orderId);
+    }
+
+    /**
+     * 获取订单详情(买家)
+     * @param userId 用户ID
+     * @return 订单详情列表
+     */
+    @Override
+    public getOrderResponse getOrderByCustomer(String userId){
+        List <Order> orders = orderMapper.selectList(new QueryWrapper<Order>().eq("user_id", userId));
+        if (orders.isEmpty()) {
+            return null;
         }
+        // 获取订单项
+        List<OrderDetailResponse> orderDetailResponses = new ArrayList<>();
+        for (Order order : orders) {
+            List<OrderItem> orderItems = orderItemService.getOrderItemByOrderId(order.getOrderId());
+            orderDetailResponses.add(new OrderDetailResponse(order.getOrderId(), order.getUserId(), order.getTotalAmount(), order.getPaymentMethod(), order.getShippingAddressId(), order.getStatus(), new getOrderItemResponse(orderItems)));
+        }
+        return new getOrderResponse(orderDetailResponses);
+    }
+
+    /**
+     * 获取订单详情(买家)
+     * @param OrderId 订单ID
+     * @param userId 用户ID
+     * @return 订单详情列表
+     */
+    @Override
+    public getOrderResponse getOrderByCustomer(String OrderId, String userId) {
+        Order order = orderMapper.selectById(OrderId);
+        if (order == null) {
+            return null;
+        }
+        if (!order.getUserId().equals(userId)) {
+            throw new IllegalArgumentException("Order does not belong to current user");
+        }
+        // 获取订单项
+        List<OrderDetailResponse> orderDetailResponses = new ArrayList<>();
+        List<OrderItem> orderItems = orderItemService.getOrderItemByOrderId(OrderId);
+        orderDetailResponses.add(new OrderDetailResponse(order.getOrderId(), order.getUserId(), order.getTotalAmount(), order.getPaymentMethod(), order.getShippingAddressId(), order.getStatus(), new getOrderItemResponse(orderItems)));
+        return new getOrderResponse(orderDetailResponses);
     }
 
     /**
@@ -85,7 +107,8 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
      */
     @Override
     public String createOrder(String cartId, OrderCreateVO orderCreateVO, String userId) {
-        Cart cart = cartService.getCartById(cartId);
+        // Cart cart = cartService.getCartById(cartId);
+        Cart cart = cartMapper.selectById(cartId);
         if (cart == null) {
             throw new IllegalArgumentException("Invalid cart ID");
         }
@@ -93,7 +116,8 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
             throw new IllegalArgumentException("Cart does not belong to current user");
         }
         // 获取购物车
-        List<CartItem> cartItems = cartItemService.getCartItemsByCartId(cartId);
+        // List<CartItem> cartItems = cartItemService.getCartItemsByCartId(cartId);
+        List<CartItem> cartItems = cartItemMapper.selectList(new QueryWrapper<CartItem>().eq("cart_id", cartId));
         if (cartItems.isEmpty()) {
             throw new IllegalArgumentException("Cart is empty");
         }
@@ -122,7 +146,7 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
             orderItem.setPrice(itemTotal);
 
             totalAmount = totalAmount.add(itemTotal);
-            orderItemMapper.insert(orderItem);
+            orderItemService.addOrderItem(orderItem);
         }
 
         // 更新订单总金额
@@ -161,18 +185,19 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
      * @param userId 卖家ID
      * @return 订单项列表
      */
-    public getOrderRespnose getOrderBySeller(String userId){
+    public getOrderResponse getOrderBySeller(String userId){
         /* 卖家视角下的订单列表，由于数据库不完整，暂时无法实现
         List <Order> orders = orderMapper.selectList(new LambdaQueryWrapper<Order>().eq(Order::getSellerId, userId));
         if (orders.isEmpty()) {
-            return new getOrderRespnose(new ArrayList<>());
+            return new null;
         }
         List<OrderDetailResponse> orderDetailResponses = new ArrayList<>();
         for (Order order : orders) {
             List<OrderItem> orderItems = orderItemMapper.selectList(new QueryWrapper<OrderItem>().eq("order_id", order.getOrderId()));
             orderDetailResponses.add(new OrderDetailResponse(order.getOrderId(), order.getUserId(), order.getTotalAmount(), order.getPaymentMethod(), order.getShippingAddressId(), order.getStatus(), new getOrderItemResponse(orderItems)));
         }
-        return new getOrderRespnose(orderDetailResponses);
+        return new getOrderResponse(orderDetailResponses);
         */
+        return null;
     }
 }
