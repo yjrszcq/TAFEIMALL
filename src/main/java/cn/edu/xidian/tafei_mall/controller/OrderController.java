@@ -90,7 +90,7 @@ public class OrderController {
             }
             boolean flag = orderService.cancelOrder(orderId, user.getUserId());
             if (!flag) {
-                return ResponseEntity.notFound().build();
+                return ResponseEntity.badRequest().build();
             }
             return ResponseEntity.ok().body(orderId);
         } catch (Exception e) {
