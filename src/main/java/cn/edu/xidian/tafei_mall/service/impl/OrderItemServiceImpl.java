@@ -1,5 +1,6 @@
 package cn.edu.xidian.tafei_mall.service.impl;
 
+import cn.edu.xidian.tafei_mall.mapper.OrderMapper;
 import cn.edu.xidian.tafei_mall.model.entity.Order;
 import cn.edu.xidian.tafei_mall.model.entity.OrderItem;
 import cn.edu.xidian.tafei_mall.mapper.OrderItemMapper;
@@ -28,62 +29,8 @@ import java.util.Objects;
 public class OrderItemServiceImpl extends ServiceImpl<OrderItemMapper, OrderItem> implements OrderItemService {
     @Autowired
     private UserService userService;
-    private OrderService orderService;
+    private OrderMapper orderMapper;
     private OrderItemMapper orderItemMapper;
-
-    @Override
-    public List<OrderItem> getOrderItemsByOrderId(String sessionId, String orderId){
-        // 验证用户是否登录
-        User user = userService.getUserInfo(sessionId);
-        if (user == null) {
-            throw new IllegalArgumentException("Invalid session ID");
-        }
-        // 获取订单项
-        if (Objects.equals(orderId, "-1") || orderId == null) { // 返回当前用户全部订单项
-            // 获取当前用户的所有订单
-            List<Order> orders = orderService.getOrderById(sessionId, "-1");
-            if (orders == null) {
-                throw new IllegalArgumentException("No orders found");
-            }
-            // 获取所有订单项
-            List<OrderItem> orderItems = new ArrayList<>();
-            for (Order order : orders) {
-                orderItems.addAll(orderItemMapper.selectList(new QueryWrapper<OrderItem>().eq("order_id", order.getOrderId())));
-            }
-            return orderItems;
-        } else {// 返回当前用户当前订单的订单项
-            List<Order> order = orderService.getOrderById(sessionId, orderId);
-            // 验证订单是否存在
-            if (order == null) {
-                throw new IllegalArgumentException("Invalid order ID");
-            }
-            return orderItemMapper.selectList(new QueryWrapper<OrderItem>().eq("order_id", orderId));
-        }
-    }
-
-    @Override
-    public List<OrderItem> getOrderItemsByAdminByOrderId(String orderId){
-        if (Objects.equals(orderId, "-1") || orderId == null) { // 返回全部订单项
-            // 获取所有订单
-            List<Order> orders = orderService.getOrderByAdminById("-1");
-            if (orders == null) {
-                throw new IllegalArgumentException("No orders found");
-            }
-            // 获取所有订单项
-            List<OrderItem> orderItems = new ArrayList<>();
-            for (Order order : orders) {
-                orderItems.addAll(orderItemMapper.selectList(new QueryWrapper<OrderItem>().eq("order_id", order.getOrderId())));
-            }
-            return orderItems;
-        } else {// 返回指定订单的订单项
-            List<Order> order = orderService.getOrderByAdminById(orderId);
-            // 验证订单是否存在
-            if (order == null) {
-                throw new IllegalArgumentException("Invalid order ID");
-            }
-            return orderItemMapper.selectList(new QueryWrapper<OrderItem>().eq("order_id", orderId));
-        }
-    }
 
     @Override
     public OrderItem getOrderItemById(String sessionId, String orderItemId){
@@ -99,12 +46,13 @@ public class OrderItemServiceImpl extends ServiceImpl<OrderItemMapper, OrderItem
             throw new IllegalArgumentException("Invalid order item ID");
         }
         // 验证订单是否属于当前用户
-        Order order = orderService.getOrderById(sessionId, orderItem.getOrderId()).get(0);
+        Order order = orderMapper.selectList(new QueryWrapper<Order>().eq("order_id",  orderItem.getOrderId()).eq("user_id", user.getUserId())).get(0);
         if (order == null) {
             throw new IllegalArgumentException("Order does not belong to current user");
         }
         return orderItem;
     }
+
     public OrderItem getOrderItemByAdminById(String orderItemId){
         // 获取订单项
         OrderItem orderItem = orderItemMapper.selectOne(new QueryWrapper<OrderItem>().eq("order_item_id", orderItemId));

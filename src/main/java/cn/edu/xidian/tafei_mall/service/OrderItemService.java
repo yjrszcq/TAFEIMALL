@@ -14,8 +14,6 @@ import java.util.List;
  * @since 2025-03-17
  */
 public interface OrderItemService extends IService<OrderItem> {
-    List<OrderItem> getOrderItemsByOrderId(String sessionId, String orderId);
-    List<OrderItem> getOrderItemsByAdminByOrderId(String orderItemId);
     OrderItem getOrderItemById(String sessionId, String orderItemId);
     OrderItem getOrderItemByAdminById(String orderItemId);
 }

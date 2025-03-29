@@ -3,7 +3,12 @@ package cn.edu.xidian.tafei_mall.service.impl;
 import cn.edu.xidian.tafei_mall.mapper.OrderItemMapper;
 import cn.edu.xidian.tafei_mall.model.entity.*;
 import cn.edu.xidian.tafei_mall.mapper.OrderMapper;
+import cn.edu.xidian.tafei_mall.model.vo.OrderCreateVO;
+import cn.edu.xidian.tafei_mall.model.vo.Response.Order.OrderDetailResponse;
+import cn.edu.xidian.tafei_mall.model.vo.Response.Order.getOrderItemResponse;
+import cn.edu.xidian.tafei_mall.model.vo.Response.Order.getOrderRespnose;
 import cn.edu.xidian.tafei_mall.service.*;
+import cn.hutool.core.bean.BeanUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -43,39 +48,71 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
      * @return 订单项列表
      */
     @Override
-    public List<Order> getOrderById(String sessionId, String orderId){
+    public getOrderRespnose getOrderById(String sessionId, String orderId){
         User user = userService.getUserInfo(sessionId);
         if (user == null) {
             throw new IllegalArgumentException("Invalid session ID");
         }
         if (Objects.equals(orderId, "-1") || orderId == null) {
-            return orderMapper.selectList(new QueryWrapper<Order>().eq("user_id", user.getUserId()));
+            List <Order> orders = orderMapper.selectList(new QueryWrapper<Order>().eq("user_id", user.getUserId()));
+            if (orders.isEmpty()) {
+                return new getOrderRespnose(new ArrayList<>());
+            }
+            List<OrderDetailResponse> orderDetailResponses = new ArrayList<>();
+            for (Order order : orders) {
+                List<OrderItem> orderItems = orderItemMapper.selectList(new QueryWrapper<OrderItem>().eq("order_id", order.getOrderId()));
+                orderDetailResponses.add(new OrderDetailResponse(order.getOrderId(), order.getUserId(), order.getTotalAmount(), order.getPaymentMethod(), order.getShippingAddressId(), order.getStatus(), new getOrderItemResponse(orderItems)));
+            }
+            return new getOrderRespnose(orderDetailResponses);
         } else {
-            return orderMapper.selectList(new QueryWrapper<Order>().eq("order_id", orderId).eq("user_id", user.getUserId()));
+            Order order = orderMapper.selectList(new QueryWrapper<Order>().eq("order_id", orderId).eq("user_id", user.getUserId())).get(0);
+            if (order == null) {
+                return new getOrderRespnose(new ArrayList<>());
+            }
+            List<OrderDetailResponse> orderDetailResponses = new ArrayList<>();
+            List<OrderItem> orderItems = orderItemMapper.selectList(new QueryWrapper<OrderItem>().eq("order_id", orderId));
+            orderDetailResponses.add(new OrderDetailResponse(order.getOrderId(), order.getUserId(), order.getTotalAmount(), order.getPaymentMethod(), order.getShippingAddressId(), order.getStatus(), new getOrderItemResponse(orderItems)));
+            return new getOrderRespnose(orderDetailResponses);
         }
     }
 
     /**
-     * 获取订单项(管理员)
+     * 获取订单项(管理员) // 等权限控制有后，可以合并到上面的方法，区别仅在于是否需要验证用户及Order获取的selectList
      * @param orderId 订单ID
      * @return 订单项列表
      */
-    public List<Order> getOrderByAdminById(String orderId){
+    public getOrderRespnose getOrderByAdminById(String orderId){
         if (Objects.equals(orderId, "-1") || orderId == null) {
-            return orderMapper.selectList(new QueryWrapper<>());
+            List <Order> orders = orderMapper.selectList(new QueryWrapper<>());
+            if (orders.isEmpty()) {
+                return new getOrderRespnose(new ArrayList<>());
+            }
+            List<OrderDetailResponse> orderDetailResponses = new ArrayList<>();
+            for (Order order : orders) {
+                List<OrderItem> orderItems = orderItemMapper.selectList(new QueryWrapper<OrderItem>().eq("order_id", order.getOrderId()));
+                orderDetailResponses.add(new OrderDetailResponse(order.getOrderId(), order.getUserId(), order.getTotalAmount(), order.getPaymentMethod(), order.getShippingAddressId(), order.getStatus(), new getOrderItemResponse(orderItems)));
+            }
+            return new getOrderRespnose(orderDetailResponses);
         } else {
-            return orderMapper.selectList(new QueryWrapper<Order>().eq("order_id", orderId));
+            Order order = orderMapper.selectList(new QueryWrapper<Order>().eq("order_id", orderId)).get(0);
+            if (order == null) {
+                return new getOrderRespnose(new ArrayList<>());
+            }
+            List<OrderDetailResponse> orderDetailResponses = new ArrayList<>();
+            List<OrderItem> orderItems = orderItemMapper.selectList(new QueryWrapper<OrderItem>().eq("order_id", orderId));
+            orderDetailResponses.add(new OrderDetailResponse(order.getOrderId(), order.getUserId(), order.getTotalAmount(), order.getPaymentMethod(), order.getShippingAddressId(), order.getStatus(), new getOrderItemResponse(orderItems)));
+            return new getOrderRespnose(orderDetailResponses);
         }
     }
 
     /**
      * 创建订单
      * @param cartId 购物车ID
-     * @param addressId 地址ID
+     * @param orderCreateVO 地址ID
      * @return 订单ID
      */
     @Override
-    public String createOrder(String cartId, Order order) {
+    public String createOrder(String cartId, OrderCreateVO orderCreateVO) {
         // 获取购物车
         List<CartItem> cartItems = cartItemService.getCartItemsByCartId(cartId);
         if (cartItems.isEmpty()) {
@@ -83,9 +120,9 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
         }
 
         // 创建订单
+        Order order = BeanUtil.toBean(orderCreateVO, Order.class);
         order.setUserId(cartService.getCartById(cartId).getUserId());
         order.setStatus("待支付");
-        order.setShippingAddressId(addressId);
         orderMapper.insert(order);
         String orderId = order.getOrderId();
 
@@ -117,9 +154,9 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
     }
 
     /**
-     * 更新订单状态
+     * 更新订单状态(仅用于Service内部调用)
      * @param orderId 订单ID
-     * @param status 状态信息
+     * @param tempOrder 状态信息
      * @return 更新后的订单
      */
     @Override

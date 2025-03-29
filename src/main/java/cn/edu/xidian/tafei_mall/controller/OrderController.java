@@ -2,12 +2,10 @@ package cn.edu.xidian.tafei_mall.controller;
 
 
 import cn.edu.xidian.tafei_mall.model.entity.Order;
-import cn.edu.xidian.tafei_mall.model.entity.OrderItem;
 import cn.edu.xidian.tafei_mall.model.vo.OrderCreateVO;
-import cn.edu.xidian.tafei_mall.model.vo.OrderUpdateVO;
+import cn.edu.xidian.tafei_mall.model.vo.Response.Order.getOrderRespnose;
 import cn.edu.xidian.tafei_mall.service.OrderItemService;
 import cn.edu.xidian.tafei_mall.service.OrderService;
-import cn.hutool.core.bean.BeanUtil;
 import io.swagger.annotations.ApiKeyAuthDefinition;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -15,7 +13,6 @@ import org.springframework.web.bind.annotation.*;
 
 import java.net.URI;
 import java.util.List;
-import java.util.Map;
 
 
 @ApiKeyAuthDefinition(key = "Session-ID", in = ApiKeyAuthDefinition.ApiKeyLocation.HEADER, name = "Session-ID")
@@ -36,12 +33,11 @@ public class OrderController {
     public ResponseEntity<?> searchOrder(@RequestHeader("Session-Id") String sessionId,
                                          @RequestParam(required = false, defaultValue = "-1") String orderId) {
         try{
-            List<Order> orders = orderService.getOrderById(sessionId, orderId);
+            getOrderRespnose orders = orderService.getOrderById(sessionId, orderId);
             return ResponseEntity.ok(orders);
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
-
     }
     /**
      * 获取订单详情(管理员)
@@ -51,69 +47,8 @@ public class OrderController {
     @GetMapping("/admin/search")
     public ResponseEntity<?> searchOrderByAdmin(@RequestParam(required = false, defaultValue = "-1") String orderId) {
         try{
-            List<Order> orders = orderService.getOrderByAdminById(orderId);
+            getOrderRespnose orders = orderService.getOrderByAdminById(orderId);
             return ResponseEntity.ok(orders);
-        } catch (Exception e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
-        }
-    }
-
-    /**
-     * 获取订单详情(用户)
-     * @param orderId 订单ID(不填就是查询当前用户所有订单项)
-     * @param sessionId Session ID
-     * @return 订单详情
-     */
-    @GetMapping("/item")
-    public ResponseEntity<?> getOrderItemsByOrderId(@RequestHeader("Session-Id") String sessionId,
-                                                    @RequestParam(required = false, defaultValue = "-1") String orderId) {
-        try{
-            List<OrderItem> items = orderItemService.getOrderItemsByOrderId(sessionId, orderId);
-            return ResponseEntity.ok(items);
-        } catch (Exception e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
-        }
-    }
-    /**
-     * 获取订单详情(管理员)
-     * @param orderId 订单ID(不填就是查询所有订单项)
-     * @return 订单详情
-     */
-    @GetMapping("/admin/item")
-    public ResponseEntity<?> getOrderItemsByAdminByOrderId(@RequestParam(required = false, defaultValue = "-1") String orderId) {
-        try{
-            List<OrderItem> items = orderItemService.getOrderItemsByAdminByOrderId(orderId);
-            return ResponseEntity.ok(items);
-        } catch (Exception e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
-        }
-    }
-    /**
-     * 获取订单项详情(用户)
-     * @param sessionId Session ID
-     * @param orderItemId 订单项ID
-     * @return 订单项详情
-     */
-    @GetMapping("/item/id")
-    public ResponseEntity<?> getOrderItemsById(@RequestHeader("Session-Id") String sessionId,
-                                               @RequestParam String orderItemId) {
-        try{
-            OrderItem item = orderItemService.getOrderItemById(sessionId, orderItemId);
-            return ResponseEntity.ok(item);
-        } catch (Exception e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
-        }
-    }
-    /**
-     * 获取订单项详情(管理员)
-     * @param orderItemId 订单项ID
-     * @return 订单项详情
-     */
-    @GetMapping("/admin/item/id")
-    public ResponseEntity<?> getOrderItemsByAdminById(@RequestParam String orderItemId) {
-        try{
-            OrderItem item = orderItemService.getOrderItemByAdminById(orderItemId);
-            return ResponseEntity.ok(item);
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
@@ -124,31 +59,11 @@ public class OrderController {
      * @param orderCreateVO 地址ID
      * @return 订单ID
      */
-    @PostMapping("/create/{cartId}")
+    @PostMapping("/{cartId}")
     public ResponseEntity<?> createOrder(@PathVariable String cartId, @RequestBody OrderCreateVO orderCreateVO) {
         try{
-            Order order = BeanUtil.toBean(orderCreateVO, Order.class);
-            String orderId = orderService.createOrder(cartId, order);
-            return ResponseEntity.created(URI.create("")).body(orderId);
-        } catch (Exception e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
-        }
-    }
-    /**
-     * 更新订单状态
-     * @param orderId 订单ID
-     * @param orderUpdateVO 状态信息
-     * @return 更新后的订单
-     */
-    @PutMapping("/update/{orderId}")
-    public ResponseEntity<?> updateOrderStatus(@PathVariable String orderId, @RequestBody OrderUpdateVO orderUpdateVO) {
-        try{
-            Order order = BeanUtil.toBean(orderUpdateVO, Order.class);
-            order = orderService.updateOrderStatus(orderId, order);
-            if (order == null) {
-                return ResponseEntity.notFound().build();
-            }
-            return ResponseEntity.ok(order);
+            String orderId = orderService.createOrder(cartId, orderCreateVO);
+            return ResponseEntity.created(URI.create("Order")).body(orderId);
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
@@ -158,7 +73,7 @@ public class OrderController {
      * @param orderId 订单ID
      * @return 是否成功
      */
-    @DeleteMapping("/cancel/{orderId}")
+    @DeleteMapping("/{orderId}")
     public ResponseEntity<?> cancelOrder(@PathVariable String orderId) {
         try{
             boolean flag = orderService.cancelOrder(orderId);
