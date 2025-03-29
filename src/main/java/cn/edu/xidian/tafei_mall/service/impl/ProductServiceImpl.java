@@ -35,24 +35,43 @@ public class ProductServiceImpl extends ServiceImpl<ProductMapper, Product> impl
 
     @Override
     public Map<String, Object> searchProducts(String keyword, int page, int limit) {
+        if (page <= 0) {
+            page = 1; // 默认从第1页开始
+        }
+        if (limit <= 0) {
+            limit = 10; // 默认每页返回10条记录
+        }
+
         LambdaQueryWrapper<Product> queryWrapper = new LambdaQueryWrapper<>();
 
         // 如果 keyword 不是空，则执行模糊查询
         if (keyword != null && !keyword.trim().isEmpty()) {
-            queryWrapper.like( Product::getName, keyword);
+            queryWrapper.like(Product::getName, keyword);
         }
 
         // 分页查询
         Page<Product> productPage = new Page<>(page, limit);
         Page<Product> resultPage = productMapper.selectPage(productPage, queryWrapper);
 
-        // 构造返回数据
+        // 获取查询结果和总数
         List<Product> products = resultPage.getRecords();
-        long total = resultPage.getTotal();
+        long total;
 
+        // 如果 keyword 为空，total 是所有记录的数量
+        if (keyword == null || keyword.trim().isEmpty()) {
+            // 如果没有关键字，重新查询没有条件限制的总记录数
+            total = productMapper.selectCount(new LambdaQueryWrapper<>());
+        } else {
+            // 如果有关键词，查询符合条件的记录数量
+            LambdaQueryWrapper<Product> countQueryWrapper = new LambdaQueryWrapper<>();
+            countQueryWrapper.like(Product::getName, keyword);
+            total = productMapper.selectCount(countQueryWrapper);
+        }
+
+        // 构造返回数据
         Map<String, Object> response = new HashMap<>();
-        response.put("total", total);
-        response.put("results", products);
+        response.put("total", total);  // 返回总记录数
+        response.put("results", products);  // 返回查询结果
         return response;
     }
 
