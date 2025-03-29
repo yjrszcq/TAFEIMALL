@@ -38,7 +38,7 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
     private OrderItemService orderItemService;
     @Autowired
     private ProductService productService;
-    /* 由于Service层的Cart不完整，暂时用Mapper层的代替
+    /* 由于Service层的Cart不完整，暂时用Mapper层的方法代替
     @Autowired
     private CartService cartService;
     @Autowired
