@@ -19,6 +19,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.*;
 
 /**
@@ -163,18 +164,19 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
     @Override
     public boolean cancelOrder(String orderId, String userId) {
         // 验证订单状态是否可以取消
-        Order order = orderMapper.selectById(orderId);
+        Order order = getOrderById(orderId);
         if (order == null) {
-            throw new IllegalArgumentException("Invalid order ID");
+            throw new RuntimeException("Order not found");
         }
         if (!order.getUserId().equals(userId)) {
             throw new IllegalArgumentException("Order does not belong to current user");
         }
-        if (!order.getStatus().equals("pending")) { // 已提交未付款
+        if (!order.getStatus().equals("pending") && !order.getStatus().equals("paid")) {
             throw new IllegalArgumentException("Order cannot be cancelled");
         }
         // 更改订单状态为已取消
         order.setStatus("canceled");
+        order.setUpdatedAt(LocalDateTime.now());
         // 提交
         orderMapper.updateById(order);
         return true;
