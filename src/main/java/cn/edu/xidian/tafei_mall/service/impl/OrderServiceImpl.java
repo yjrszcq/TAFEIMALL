@@ -32,74 +32,42 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
     @Autowired
     private OrderItemMapper orderItemMapper;
     @Autowired
-    private UserService userService;
-    @Autowired
     private ProductService productService;
     @Autowired
     private CartService cartService;
     @Autowired
     private CartItemService cartItemService;
-
+    @Autowired
+    private OrderItemService orderItemService;
 
     /**
      * 获取订单项
      * @param orderId 订单ID
-     * @param sessionId 会话ID
+     * @param userId 用户ID
      * @return 订单项列表
      */
     @Override
-    public getOrderRespnose getOrderById(String sessionId, String orderId){
-        User user = userService.getUserInfo(sessionId);
-        if (user == null) {
-            throw new IllegalArgumentException("Invalid session ID");
-        }
-        if (Objects.equals(orderId, "-1") || orderId == null) {
-            List <Order> orders = orderMapper.selectList(new QueryWrapper<Order>().eq("user_id", user.getUserId()));
+    public getOrderRespnose getOrderById(String orderId, String userId){
+        if (Objects.equals(orderId, "-1") || orderId == null) { // 获取所有订单
+            List <Order> orders = orderMapper.selectList(new QueryWrapper<Order>().eq("user_id", userId));
             if (orders.isEmpty()) {
                 return new getOrderRespnose(new ArrayList<>());
             }
+            // 获取订单项
             List<OrderDetailResponse> orderDetailResponses = new ArrayList<>();
             for (Order order : orders) {
-                List<OrderItem> orderItems = orderItemMapper.selectList(new QueryWrapper<OrderItem>().eq("order_id", order.getOrderId()));
+                List<OrderItem> orderItems = orderItemService.getOrderItemByOrderId(orderId);
                 orderDetailResponses.add(new OrderDetailResponse(order.getOrderId(), order.getUserId(), order.getTotalAmount(), order.getPaymentMethod(), order.getShippingAddressId(), order.getStatus(), new getOrderItemResponse(orderItems)));
             }
             return new getOrderRespnose(orderDetailResponses);
-        } else {
-            Order order = orderMapper.selectList(new QueryWrapper<Order>().eq("order_id", orderId).eq("user_id", user.getUserId())).get(0);
+        } else { // 获取指定订单
+            Order order = orderMapper.selectList(new QueryWrapper<Order>().eq("order_id", orderId).eq("user_id", userId)).get(0);
             if (order == null) {
                 return new getOrderRespnose(new ArrayList<>());
             }
+            // 获取订单项
             List<OrderDetailResponse> orderDetailResponses = new ArrayList<>();
-            List<OrderItem> orderItems = orderItemMapper.selectList(new QueryWrapper<OrderItem>().eq("order_id", orderId));
-            orderDetailResponses.add(new OrderDetailResponse(order.getOrderId(), order.getUserId(), order.getTotalAmount(), order.getPaymentMethod(), order.getShippingAddressId(), order.getStatus(), new getOrderItemResponse(orderItems)));
-            return new getOrderRespnose(orderDetailResponses);
-        }
-    }
-
-    /**
-     * 获取订单项(管理员) // 等权限控制有后，可以合并到上面的方法，区别仅在于是否需要验证用户及Order获取的selectList
-     * @param orderId 订单ID
-     * @return 订单项列表
-     */
-    public getOrderRespnose getOrderByAdminById(String orderId){
-        if (Objects.equals(orderId, "-1") || orderId == null) {
-            List <Order> orders = orderMapper.selectList(new QueryWrapper<>());
-            if (orders.isEmpty()) {
-                return new getOrderRespnose(new ArrayList<>());
-            }
-            List<OrderDetailResponse> orderDetailResponses = new ArrayList<>();
-            for (Order order : orders) {
-                List<OrderItem> orderItems = orderItemMapper.selectList(new QueryWrapper<OrderItem>().eq("order_id", order.getOrderId()));
-                orderDetailResponses.add(new OrderDetailResponse(order.getOrderId(), order.getUserId(), order.getTotalAmount(), order.getPaymentMethod(), order.getShippingAddressId(), order.getStatus(), new getOrderItemResponse(orderItems)));
-            }
-            return new getOrderRespnose(orderDetailResponses);
-        } else {
-            Order order = orderMapper.selectList(new QueryWrapper<Order>().eq("order_id", orderId)).get(0);
-            if (order == null) {
-                return new getOrderRespnose(new ArrayList<>());
-            }
-            List<OrderDetailResponse> orderDetailResponses = new ArrayList<>();
-            List<OrderItem> orderItems = orderItemMapper.selectList(new QueryWrapper<OrderItem>().eq("order_id", orderId));
+            List<OrderItem> orderItems = orderItemService.getOrderItemByOrderId(orderId);
             orderDetailResponses.add(new OrderDetailResponse(order.getOrderId(), order.getUserId(), order.getTotalAmount(), order.getPaymentMethod(), order.getShippingAddressId(), order.getStatus(), new getOrderItemResponse(orderItems)));
             return new getOrderRespnose(orderDetailResponses);
         }
@@ -109,10 +77,18 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
      * 创建订单
      * @param cartId 购物车ID
      * @param orderCreateVO 地址ID
+     * @param userId 用户ID
      * @return 订单ID
      */
     @Override
-    public String createOrder(String cartId, OrderCreateVO orderCreateVO) {
+    public String createOrder(String cartId, OrderCreateVO orderCreateVO, String userId) {
+        Cart cart = cartService.getCartById(cartId);
+        if (cart == null) {
+            throw new IllegalArgumentException("Invalid cart ID");
+        }
+        if (!cart.getUserId().equals(userId)) {
+            throw new IllegalArgumentException("Cart does not belong to current user");
+        }
         // 获取购物车
         List<CartItem> cartItems = cartItemService.getCartItemsByCartId(cartId);
         if (cartItems.isEmpty()) {
@@ -121,7 +97,7 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
 
         // 创建订单
         Order order = BeanUtil.toBean(orderCreateVO, Order.class);
-        order.setUserId(cartService.getCartById(cartId).getUserId());
+        order.setUserId(userId);
         order.setStatus("待支付");
         orderMapper.insert(order);
         String orderId = order.getOrderId();
@@ -152,103 +128,48 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
 
         return orderId;
     }
-
-    /**
-     * 更新订单状态(仅用于Service内部调用)
-     * @param orderId 订单ID
-     * @param tempOrder 状态信息
-     * @return 更新后的订单
-     */
-    @Override
-    public Order updateOrderStatus(String orderId, Order tempOrder) {
-        switch(tempOrder.getStatus()){
-            case "已取消": {
-                // 验证订单状态是否可以取消
-                Order order = orderMapper.selectById(orderId);
-                if (!order.getStatus().equals("待支付")) {
-                    throw new IllegalArgumentException("Order cannot be cancelled");
-                }
-                // 更改订单状态为已取消
-                order.setStatus("已取消");
-                // 提交
-                orderMapper.updateById(order);
-                return order;
-            }
-            case "已支付": {
-                // 验证订单状态是否可以支付
-                Order order = orderMapper.selectById(orderId);
-                if (!order.getStatus().equals("待支付")) {
-                    throw new IllegalArgumentException("Order cannot be paid");
-                }
-                // 更改订单状态为已支付
-                order.setStatus("已支付");
-                // order.setPaymentMethod(tempOrder.getPaymentMethod()); // 添加支付模块后使用
-
-                // 清空购物车
-                Cart cart = cartService.getCartByUserId(order.getUserId());
-                cartItemService.deleteCartItemsByCartId(cart.getCartId());
-                /* // 用于可以购买购物车中的部分商品的情况
-                Cart cart = cartService.getCartByUserId(order.getUserId());
-                List<OrderItem> orderItems = orderItemService.getOrderItemsByOrderId(order.getOrderId());
-                for (OrderItem orderItem : orderItems) {
-                    cartItemService.deleteCartItem(cart.getCartId(), orderItem.getProductId());
-                }
-                */
-
-                // 提交
-                orderMapper.updateById(order);
-                return order;
-            }
-            case "已发货": {
-                // 验证订单状态是否可以发货
-                Order order = orderMapper.selectById(orderId);
-                if (!order.getStatus().equals("已支付")) {
-                    throw new IllegalArgumentException("Order cannot be shipped");
-                }
-                // 更改订单状态为已发货
-                order.setStatus("已发货");
-                // 提交
-                orderMapper.updateById(order);
-                return order;
-            }
-            case "已送达": {
-                // 验证订单状态是否可以送达
-                Order order = orderMapper.selectById(orderId);
-                if (!order.getStatus().equals("已发货")) {
-                    throw new IllegalArgumentException("Order cannot be delivered");
-                }
-                // 更改订单状态为已送达
-                order.setStatus("已送达");
-                // 提交
-                orderMapper.updateById(order);
-                return order;
-            }
-            case "已完成": {
-                // 验证订单状态是否可以完成
-                Order order = orderMapper.selectById(orderId);
-                if (!order.getStatus().equals("已发货")) {
-                    throw new IllegalArgumentException("Order cannot be completed");
-                }
-                // 更改订单状态为已完成
-                order.setStatus("已完成");
-                // 提交
-                orderMapper.updateById(order);
-                return order;
-            }
-        }
-        return new Order();
-    }
-
     /**
      * 取消订单
      * @param orderId 订单ID
      * @return 是否成功
      */
     @Override
-    public boolean cancelOrder(String orderId) {
-        Order tempOrder = new Order();
-        tempOrder.setStatus("已取消");
-        Order order = updateOrderStatus(orderId, tempOrder);
-        return order.getOrderId() != null;
+    public boolean cancelOrder(String orderId, String userId) {
+        // 验证订单状态是否可以取消
+        Order order = orderMapper.selectById(orderId);
+        if (order == null) {
+            throw new IllegalArgumentException("Invalid order ID");
+        }
+        if (!order.getUserId().equals(userId)) {
+            throw new IllegalArgumentException("Order does not belong to current user");
+        }
+        if (!order.getStatus().equals("待支付")) {
+            throw new IllegalArgumentException("Order cannot be cancelled");
+        }
+        // 更改订单状态为已取消
+        order.setStatus("已取消");
+        // 提交
+        orderMapper.updateById(order);
+        return true;
+    }
+
+    /**
+     * 获取订单项(卖家)
+     * @param userId 卖家ID
+     * @return 订单项列表
+     */
+    public getOrderRespnose getOrderBySeller(String userId){
+        /* 卖家视角下的订单列表，由于数据库不完整，暂时无法实现
+        List <Order> orders = orderMapper.selectList(new LambdaQueryWrapper<Order>().eq(Order::getSellerId, userId));
+        if (orders.isEmpty()) {
+            return new getOrderRespnose(new ArrayList<>());
+        }
+        List<OrderDetailResponse> orderDetailResponses = new ArrayList<>();
+        for (Order order : orders) {
+            List<OrderItem> orderItems = orderItemMapper.selectList(new QueryWrapper<OrderItem>().eq("order_id", order.getOrderId()));
+            orderDetailResponses.add(new OrderDetailResponse(order.getOrderId(), order.getUserId(), order.getTotalAmount(), order.getPaymentMethod(), order.getShippingAddressId(), order.getStatus(), new getOrderItemResponse(orderItems)));
+        }
+        return new getOrderRespnose(orderDetailResponses);
+        */
     }
 }

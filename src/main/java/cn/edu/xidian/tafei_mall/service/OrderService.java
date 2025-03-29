@@ -16,9 +16,9 @@ import java.util.List;
  * @since 2025-03-17
  */
 public interface OrderService extends IService<Order> {
-    getOrderRespnose getOrderById(String sessionId, String OrderId);
-    getOrderRespnose getOrderByAdminById(String OrderId);
-    String createOrder(String cartId, OrderCreateVO orderCreateVO);
-    Order updateOrderStatus(String orderId, Order tempOrder); // 内部使用
-    boolean cancelOrder(String orderId);
+    getOrderRespnose getOrderById(String OrderId, String userId);
+    String createOrder(String cartId, OrderCreateVO orderCreateVO, String userId);
+    boolean cancelOrder(String orderId, String userId);
+
+    getOrderRespnose getOrderBySeller(String userId);
 }

@@ -28,38 +28,15 @@ import java.util.Objects;
 @Service
 public class OrderItemServiceImpl extends ServiceImpl<OrderItemMapper, OrderItem> implements OrderItemService {
     @Autowired
-    private UserService userService;
-    private OrderMapper orderMapper;
     private OrderItemMapper orderItemMapper;
 
     @Override
-    public OrderItem getOrderItemById(String sessionId, String orderItemId){
-        // 验证用户是否登录
-        User user = userService.getUserInfo(sessionId);
-        if (user == null) {
-            throw new IllegalArgumentException("Invalid session ID");
-        }
-        // 获取订单项
-        OrderItem orderItem = orderItemMapper.selectOne(new QueryWrapper<OrderItem>().eq("order_item_id", orderItemId));
-        // 验证订单项是否存在
-        if (orderItem == null) {
-            throw new IllegalArgumentException("Invalid order item ID");
-        }
-        // 验证订单是否属于当前用户
-        Order order = orderMapper.selectList(new QueryWrapper<Order>().eq("order_id",  orderItem.getOrderId()).eq("user_id", user.getUserId())).get(0);
-        if (order == null) {
-            throw new IllegalArgumentException("Order does not belong to current user");
-        }
-        return orderItem;
+    public OrderItem getOrderItemById(String orderItemId){
+        return orderItemMapper.selectOne(new QueryWrapper<OrderItem>().eq("order_item_id", orderItemId));
     }
 
-    public OrderItem getOrderItemByAdminById(String orderItemId){
-        // 获取订单项
-        OrderItem orderItem = orderItemMapper.selectOne(new QueryWrapper<OrderItem>().eq("order_item_id", orderItemId));
-        // 验证订单项是否存在
-        if (orderItem == null) {
-            throw new IllegalArgumentException("Invalid order item ID");
-        }
-        return orderItem;
+    @Override
+    public List<OrderItem> getOrderItemByOrderId(String orderId){
+        return orderItemMapper.selectList(new QueryWrapper<OrderItem>().eq("order_id", orderId));
     }
 }
