@@ -141,12 +141,14 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
         }
 
         // 生成每个seller的订单
+        // Order tempOrder = BeanUtil.toBean(orderCreateVO, Order.class);
         List<String> orderIds = new ArrayList<>();
         for (Map.Entry<String, List<OrderItem>> entry : orderItemListMap.entrySet()) {
             // 创建订单
             Order order = new Order();
             order.setUserId(userId);
             // order.setSellerId(entry.getKey());
+            // order.setAddressId(tempOrder.getAddressId());
             order.setStatus("pending");
             order.setCreatedAt(LocalDateTime.now());
             order.setUpdatedAt(LocalDateTime.now());
