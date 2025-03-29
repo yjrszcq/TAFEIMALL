@@ -5,10 +5,10 @@ import lombok.Getter;
 
 @Getter
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class IdResponse {
+public class OrderIdResponse {
     private final String orderId;
 
-    public IdResponse(String orderId) {
+    public OrderIdResponse(String orderId) {
         this.orderId = orderId;
     }
 }

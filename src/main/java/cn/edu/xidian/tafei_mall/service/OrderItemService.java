@@ -1,6 +1,7 @@
 package cn.edu.xidian.tafei_mall.service;
 
 import cn.edu.xidian.tafei_mall.model.entity.OrderItem;
+import cn.edu.xidian.tafei_mall.model.vo.Response.Seller.getOrderItemResponse;
 import com.baomidou.mybatisplus.extension.service.IService;
 
 import java.util.List;
@@ -18,4 +19,7 @@ public interface OrderItemService extends IService<OrderItem> {
     OrderItem getOrderItemById(String orderItemId);
     List<OrderItem> getOrderItemByOrderId(String orderId);
     String addOrderItem(OrderItem orderItem);
+
+    // 卖家
+    getOrderItemResponse getOrderItemBySeller(String userId);
 }

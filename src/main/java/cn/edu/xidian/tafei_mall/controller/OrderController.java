@@ -3,9 +3,10 @@ package cn.edu.xidian.tafei_mall.controller;
 
 import cn.edu.xidian.tafei_mall.model.entity.User;
 import cn.edu.xidian.tafei_mall.model.vo.OrderCreateVO;
-import cn.edu.xidian.tafei_mall.model.vo.Response.Order.IdResponse;
+import cn.edu.xidian.tafei_mall.model.vo.Response.Order.OrderIdResponse;
 import cn.edu.xidian.tafei_mall.model.vo.Response.Order.MessageResponse;
-import cn.edu.xidian.tafei_mall.model.vo.Response.Order.getOrderResponse;
+import cn.edu.xidian.tafei_mall.model.vo.Response.Buyer.createOrderBuyerResponse;
+import cn.edu.xidian.tafei_mall.model.vo.Response.Buyer.getOrderBuyerResponse;
 import cn.edu.xidian.tafei_mall.service.OrderService;
 import cn.edu.xidian.tafei_mall.service.UserService;
 import io.swagger.annotations.ApiKeyAuthDefinition;
@@ -13,8 +14,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
-import java.net.URI;
 
 
 @ApiKeyAuthDefinition(key = "Session-ID", in = ApiKeyAuthDefinition.ApiKeyLocation.HEADER, name = "Session-ID")
@@ -43,11 +42,11 @@ public class OrderController {
                 return new ResponseEntity<>(new MessageResponse("用户不存在"), HttpStatus.UNAUTHORIZED);
             }
             if (orderId.equals("-1")) {
-                getOrderResponse orders = orderService.getOrderByCustomer(user.getUserId());
-                return new ResponseEntity<>(orders, HttpStatus.OK);
+                getOrderBuyerResponse response = orderService.getOrderByCustomer(user.getUserId());
+                return new ResponseEntity<>(response, HttpStatus.OK);
             } else {
-                getOrderResponse orders = orderService.getOrderByCustomer(orderId, user.getUserId());
-                return new ResponseEntity<>(orders, HttpStatus.OK);
+                getOrderBuyerResponse response = orderService.getOrderByCustomer(orderId, user.getUserId());
+                return new ResponseEntity<>(response, HttpStatus.OK);
             }
         } catch (Exception e) {
             return new ResponseEntity<>(new MessageResponse(e.getMessage()), HttpStatus.BAD_REQUEST);
@@ -69,8 +68,8 @@ public class OrderController {
             if (user == null) {
                 return new ResponseEntity<>(new MessageResponse("用户不存在"), HttpStatus.UNAUTHORIZED);
             }
-            String orderId = orderService.createOrder(cartId, orderCreateVO, user.getUserId());
-            return ResponseEntity.created(URI.create("Order")).body(orderId);
+            createOrderBuyerResponse response = orderService.createOrder(cartId, orderCreateVO, user.getUserId());
+            return new ResponseEntity<>(response, HttpStatus.OK);
         } catch (Exception e) {
             return new ResponseEntity<>(new MessageResponse(e.getMessage()), HttpStatus.BAD_REQUEST);
         }
@@ -94,9 +93,9 @@ public class OrderController {
             if (!flag) {
                 return new ResponseEntity<>(new MessageResponse("取消失败"), HttpStatus.BAD_REQUEST);
             }
-            return ResponseEntity.ok().body(orderId);
+            return new ResponseEntity<>(new OrderIdResponse(orderId), HttpStatus.OK);
         } catch (Exception e) {
-            return new ResponseEntity<>(new IdResponse(orderId), HttpStatus.OK);
+            return new ResponseEntity<>(new MessageResponse(e.getMessage()), HttpStatus.BAD_REQUEST);
         }
     }
 }

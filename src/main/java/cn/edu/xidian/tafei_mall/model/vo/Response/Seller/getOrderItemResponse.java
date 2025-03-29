@@ -1,4 +1,4 @@
-package cn.edu.xidian.tafei_mall.model.vo.Response.Order;
+package cn.edu.xidian.tafei_mall.model.vo.Response.Seller;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.Getter;
@@ -14,3 +14,4 @@ public class getOrderItemResponse {
         this.items = items;
     }
 }
+
