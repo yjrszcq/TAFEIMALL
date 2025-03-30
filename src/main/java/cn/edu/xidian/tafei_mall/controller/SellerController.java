@@ -1,17 +1,21 @@
 package cn.edu.xidian.tafei_mall.controller;
 
 
-import cn.edu.xidian.tafei_mall.model.entity.Product;
 import cn.edu.xidian.tafei_mall.model.entity.User;
 import cn.edu.xidian.tafei_mall.model.vo.*;
+import cn.edu.xidian.tafei_mall.model.vo.Response.Order.MessageResponse;
+import cn.edu.xidian.tafei_mall.model.vo.Response.Buyer.getOrderBuyerResponse;
 import cn.edu.xidian.tafei_mall.model.vo.Response.Seller.addProductResponse;
+import cn.edu.xidian.tafei_mall.model.vo.Response.Seller.getOrderItemResponse;
 import cn.edu.xidian.tafei_mall.model.vo.Response.Seller.getProductResponse;
+import cn.edu.xidian.tafei_mall.model.vo.Response.Seller.updateOrderResponse;
+import cn.edu.xidian.tafei_mall.service.OrderItemService;
 import cn.edu.xidian.tafei_mall.service.ProductService;
 import cn.edu.xidian.tafei_mall.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.*;
 import org.springframework.web.bind.annotation.*;
-
+import cn.edu.xidian.tafei_mall.service.OrderService;
 import java.net.URI;
 import java.util.Map;
 
@@ -37,6 +41,12 @@ public class SellerController {
 
     @Autowired
     private ProductService productService;
+
+    @Autowired
+    private OrderService orderService;
+
+    @Autowired
+    private OrderItemService orderItemService;
 
     @PostMapping("/products")
     public ResponseEntity<?> addProduct(@RequestBody ProductVO productVO, @RequestHeader("Session-Id") String sessionId) {
@@ -104,8 +114,36 @@ public class SellerController {
     }
 
     @GetMapping("/orders")
-    public ResponseEntity<?> getOrders() {
-        // Implement get orders logic
-        return ResponseEntity.ok("获取成功");
+    public ResponseEntity<?> getOrders(@RequestHeader("Session-Id") String sessionId) {
+        try{
+            if (sessionId == null) {
+                return new ResponseEntity<>(new MessageResponse("未登录"), HttpStatus.UNAUTHORIZED);
+            }
+            User user = userService.getUserInfo(sessionId);
+            if (user == null) {
+                return new ResponseEntity<>(new MessageResponse("用户不存在"), HttpStatus.UNAUTHORIZED);
+            }
+            getOrderItemResponse response = orderItemService.getOrderItemBySeller(user.getUserId());
+            return ResponseEntity.ok().body(response);
+        } catch (Exception e) {
+            return new ResponseEntity<>(new MessageResponse(e.getMessage()), HttpStatus.BAD_REQUEST);
+        }
+    }
+
+    @GetMapping("/orders/{orderId}")
+    public ResponseEntity<?> updateOrder(@RequestHeader("Session-Id") String sessionId, @PathVariable String orderId, @RequestBody OrderUpdateVO orderUpdateVO) {
+        try{
+            if (sessionId == null) {
+                return new ResponseEntity<>(new MessageResponse("未登录"), HttpStatus.UNAUTHORIZED);
+            }
+            User user = userService.getUserInfo(sessionId);
+            if (user == null) {
+                return new ResponseEntity<>(new MessageResponse("用户不存在"), HttpStatus.UNAUTHORIZED);
+            }
+            updateOrderResponse response = orderService.updateOrderBySeller(orderId, orderUpdateVO, user.getUserId());
+            return ResponseEntity.ok().body(response);
+        } catch (Exception e) {
+            return new ResponseEntity<>(new MessageResponse(e.getMessage()), HttpStatus.BAD_REQUEST);
+        }
     }
 }
