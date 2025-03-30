@@ -151,7 +151,7 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
             if (address == null) {
                 throw new IllegalArgumentException("Invalid address ID");
             }
-        } else {
+        } else { // 如果没有传入地址ID，使用用户默认地址(默认为第一个地址)
             // Address address = addressService.getAddressByUserId(userId).get(0);
             Address address = addressMapper.selectList(new QueryWrapper<Address>().eq("user_id", userId)).get(0);
             if (address == null) {
