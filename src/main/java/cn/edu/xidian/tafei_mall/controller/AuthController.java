@@ -46,7 +46,7 @@ public class AuthController {
             String str = userService.login(loginRequestVO);
             String[] strs = str.split(",");
             if(strs[0].equals("Failed")){
-                return new ResponseEntity<>(new LoginResponse("","",""),HttpStatus.BAD_REQUEST);
+                return new ResponseEntity<>(new LoginResponse("","",""),HttpStatus.UNAUTHORIZED);
             }else {
                 return new ResponseEntity<>(new LoginResponse(strs[0], strs[1], loginRequestVO.getUsername()), HttpStatus.OK);
             }

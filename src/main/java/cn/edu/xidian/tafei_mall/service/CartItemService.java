@@ -1,6 +1,7 @@
 package cn.edu.xidian.tafei_mall.service;
 
 import cn.edu.xidian.tafei_mall.model.entity.CartItem;
+import cn.edu.xidian.tafei_mall.model.vo.CartItemUpdateVO;
 import com.baomidou.mybatisplus.extension.service.IService;
 
 /**
@@ -12,5 +13,6 @@ import com.baomidou.mybatisplus.extension.service.IService;
  * @since 2025-03-17
  */
 public interface CartItemService extends IService<CartItem> {
-
+    void updateCartItem(String itemId, CartItemUpdateVO cartItemUpdateVO);
+    void deleteCartItem(String itemId);
 }
