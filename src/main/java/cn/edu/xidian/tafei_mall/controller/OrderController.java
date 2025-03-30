@@ -30,7 +30,7 @@ public class OrderController {
      * @param sessionId Session ID
      * @return 订单详情
      */
-    @GetMapping("/search")
+    @GetMapping("")
     public ResponseEntity<?> searchOrder(@RequestHeader("Session-Id") String sessionId,
                                          @RequestParam(required = false, defaultValue = "-1") String orderId) {
         try{
