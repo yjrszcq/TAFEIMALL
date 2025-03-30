@@ -1,5 +1,6 @@
 package cn.edu.xidian.tafei_mall.service.impl;
 
+import cn.edu.xidian.tafei_mall.mapper.AddressMapper;
 import cn.edu.xidian.tafei_mall.mapper.CartItemMapper;
 import cn.edu.xidian.tafei_mall.mapper.CartMapper;
 import cn.edu.xidian.tafei_mall.model.entity.*;
@@ -38,16 +39,20 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
     private OrderItemService orderItemService;
     @Autowired
     private ProductService productService;
-    /* 由于Service层的Cart不完整，暂时用Mapper层的方法代替
+    /* 由于Service层的Cart和Address不完整，暂时用Mapper层的方法代替
     @Autowired
     private CartService cartService;
     @Autowired
     private CartItemService cartItemService;
+    @Autowired
+    private AddressService addressService;
      */
     @Autowired
     private CartMapper cartMapper;
     @Autowired
     private CartItemMapper cartItemMapper;
+    @Autowired
+    private AddressMapper addressMapper;
 
     /**
      * 获取订单(内部使用)
@@ -139,7 +144,24 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
             orderItem.setPrice(product.get().getPrice().multiply(BigDecimal.valueOf(cartItem.getQuantity())));
             orderItemListMap.get(sellerId).add(orderItem);
         }
-
+        // 获取地址
+        String addressId;
+        if (orderCreateVO != null) {
+            Order tempOrder = BeanUtil.toBean(orderCreateVO, Order.class);
+            addressId = tempOrder.getShippingAddressId();
+            // Address address = addressService.getAddressById(addressId);
+            Address address = addressMapper.selectById(addressId);
+            if (address == null) {
+                throw new IllegalArgumentException("Invalid address ID");
+            }
+        } else {
+            // Address address = addressService.getAddressByUserId(userId).get(0);
+            Address address = addressMapper.selectList(new QueryWrapper<Address>().eq("user_id", userId)).get(0);
+            if (address == null) {
+                throw new IllegalArgumentException("Address not found");
+            }
+            addressId = address.getAddressId();
+        }
         // 生成每个seller的订单
         // Order tempOrder = BeanUtil.toBean(orderCreateVO, Order.class);
         List<String> orderIds = new ArrayList<>();
@@ -148,7 +170,7 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
             Order order = new Order();
             order.setUserId(userId);
             // order.setSellerId(entry.getKey());
-            // order.setAddressId(tempOrder.getAddressId());
+            order.setShippingAddressId(addressId);
             order.setStatus("pending");
             order.setCreatedAt(LocalDateTime.now());
             order.setUpdatedAt(LocalDateTime.now());
@@ -231,7 +253,12 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
                 // order.setTrackingNumber(tempOrder.getTrackingNumber());
                 order.setUpdatedAt(LocalDateTime.now());
                 orderMapper.updateById(order);
-                return new updateOrderResponse(order.getStatus());
+                if (Objects.equals(order.getStatus(), "shipping")) {
+                    return new updateOrderResponse("已发货");
+                } else {
+                    throw new RuntimeException("Failed to update order status");
+                }
+
             }
             case "cancel": { // to 'canceled'
                 if (!order.getStatus().equals("pending") && !order.getStatus().equals("paid")) {
@@ -240,7 +267,11 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
                 order.setStatus("canceled");
                 order.setUpdatedAt(LocalDateTime.now());
                 orderMapper.updateById(order);
-                return new updateOrderResponse(order.getStatus());
+                if (Objects.equals(order.getStatus(), "canceled")) {
+                    return new updateOrderResponse("已取消");
+                } else {
+                    throw new RuntimeException("Failed to update order status");
+                }
             }
             default:
                 throw new IllegalArgumentException("Invalid status");

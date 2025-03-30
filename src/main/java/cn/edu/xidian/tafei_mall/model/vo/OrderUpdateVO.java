@@ -1,12 +1,12 @@
 package cn.edu.xidian.tafei_mall.model.vo;
 
-import cn.hutool.core.annotation.Alias;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
 
 @Data
 public class OrderUpdateVO {
+    @JsonProperty("action")
+    private String status;
 
-    @Alias("status")
-    private String action;
-    // private String trackingNumber;
+    private String trackingNumber;
 }
