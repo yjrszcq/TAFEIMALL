@@ -12,9 +12,9 @@ import cn.edu.xidian.tafei_mall.model.vo.Response.Seller.updateOrderResponse;
 import cn.edu.xidian.tafei_mall.service.*;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import org.jetbrains.annotations.Contract;
-import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.lang.Contract;
+import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -69,7 +69,7 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
      */
     @Override
     public getOrderBuyerResponse getOrderByCustomer(String userId){
-        List <Order> orders = orderMapper.selectList(new QueryWrapper<Order>().eq("user_id", userId));
+        List <Order> orders = orderMapper.findByUserId(userId);
         if (orders.isEmpty()) {
             return null;
         }
@@ -171,6 +171,7 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
             order.setStatus("pending");
             order.setCreatedAt(LocalDateTime.now());
             order.setUpdatedAt(LocalDateTime.now());
+            order.setOrderId(UUID.randomUUID().toString());
             orderMapper.insert(order);
             orderIds.add(order.getOrderId());
             // 生成订单项
@@ -178,6 +179,7 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
             BigDecimal totalAmount = BigDecimal.ZERO;
             for (OrderItem orderItem : entry.getValue()) {
                 orderItem.setOrderId(orderId);
+                orderItem.setOrderItemId(UUID.randomUUID().toString());
                 orderItemService.addOrderItem(orderItem);
                 totalAmount = totalAmount.add(orderItem.getPrice());
             }
@@ -208,7 +210,6 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
         }
         // 更改订单状态为已取消
         order.setStatus("canceled");
-        order.setUpdatedAt(LocalDateTime.now());
         // 提交
         orderMapper.updateById(order);
         return true;
@@ -276,7 +277,7 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
 
     // 生成订单详情，class内部使用
     @Contract("_ -> new")
-    private @NotNull OrderBuyerResponse OrderDetailGenerator(@NotNull Order order) {
+    private @NonNull OrderBuyerResponse OrderDetailGenerator(@NonNull Order order) {
         List<OrderItemBuyerResponse> orderItemBuyerResponses = new ArrayList<>();
         List<OrderItem> orderItems = orderItemService.getOrderItemByOrderId(order.getOrderId());
         for (OrderItem orderItem : orderItems) {

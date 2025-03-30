@@ -96,7 +96,7 @@ public class OrderController {
             if (!flag) {
                 return new ResponseEntity<>(new MessageResponse("取消失败"), HttpStatus.BAD_REQUEST);
             }
-            return new ResponseEntity<>(new OrderIdResponse(orderId), HttpStatus.OK);
+            return ResponseEntity.noContent().build();
         } catch (Exception e) {
             return new ResponseEntity<>(new MessageResponse(e.getMessage()), HttpStatus.BAD_REQUEST);
         }
