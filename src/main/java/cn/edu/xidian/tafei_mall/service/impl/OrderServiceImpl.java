@@ -8,10 +8,8 @@ import cn.edu.xidian.tafei_mall.mapper.OrderMapper;
 import cn.edu.xidian.tafei_mall.model.vo.OrderCreateVO;
 import cn.edu.xidian.tafei_mall.model.vo.OrderUpdateVO;
 import cn.edu.xidian.tafei_mall.model.vo.Response.Buyer.*;
-import cn.edu.xidian.tafei_mall.model.vo.Response.Seller.OrderItemResponse;
 import cn.edu.xidian.tafei_mall.model.vo.Response.Seller.updateOrderResponse;
 import cn.edu.xidian.tafei_mall.service.*;
-import cn.hutool.core.bean.BeanUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import org.jetbrains.annotations.Contract;
@@ -147,8 +145,7 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
         // 获取地址
         String addressId;
         if (orderCreateVO != null) {
-            Order tempOrder = BeanUtil.toBean(orderCreateVO, Order.class);
-            addressId = tempOrder.getShippingAddressId();
+            addressId = orderCreateVO.getShippingAddressId();
             // Address address = addressService.getAddressById(addressId);
             Address address = addressMapper.selectById(addressId);
             if (address == null) {
@@ -243,14 +240,13 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
             throw new IllegalArgumentException("Order does not belong to current user");
         }
         // 更新订单状态
-        Order tempOrder = BeanUtil.toBean(orderUpdateVO, Order.class);
-        switch (tempOrder.getStatus()) {
+        switch (orderUpdateVO.getAction()) {
             case "ship": { // to 'shipping'
                 if (!order.getStatus().equals("paid")) {
                     throw new IllegalArgumentException("Order cannot be shipping");
                 }
                 order.setStatus("shipping");
-                // order.setTrackingNumber(tempOrder.getTrackingNumber());
+                // order.setTrackingNumber(orderUpdateVO.getTrackingNumber());
                 order.setUpdatedAt(LocalDateTime.now());
                 orderMapper.updateById(order);
                 if (Objects.equals(order.getStatus(), "shipping")) {
