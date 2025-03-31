@@ -38,16 +38,6 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
     private OrderItemService orderItemService;
     @Autowired
     private ProductService productService;
-    /* 由于Service层的Cart和Address不完整，暂时用Mapper层的方法代替
-
-    @Autowired
-    private CartService cartService;
-    @Autowired
-    private CartItemService cartItemService;
-    @Autowired
-    private AddressService addressService;
-
-     */
     @Autowired
     private CartMapper cartMapper;
     @Autowired
@@ -118,7 +108,6 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
     @Override
 
     public createOrderBuyerResponse createOrder(String cartId, OrderCreateVO orderCreateVO, String userId) {
-        // Cart cart = cartService.getCartById(cartId);
         Cart cart = cartMapper.selectById(cartId);
         if (cart == null) {
             throw new IllegalArgumentException("Invalid cart ID");
@@ -127,7 +116,6 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
             throw new IllegalArgumentException("Cart does not belong to current user");
         }
         // 获取购物车
-        // List<CartItem> cartItems = cartItemService.getCartItemsByCartId(cartId);
         List<CartItem> cartItems = cartItemMapper.selectList(new QueryWrapper<CartItem>().eq("cart_id", cartId));
         if (cartItems.isEmpty()) {
             throw new IllegalArgumentException("Cart is empty");
@@ -156,13 +144,11 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
         String addressId;
         if (orderCreateVO != null) {
             addressId = orderCreateVO.getShippingAddressId();
-            // Address address = addressService.getAddressById(addressId);
             Address address = addressMapper.selectById(addressId);
             if (address == null) {
                 throw new IllegalArgumentException("Invalid address ID");
             }
         } else { // 如果没有传入地址ID，使用用户默认地址(默认为第一个地址)
-            // Address address = addressService.getAddressByUserId(userId).get(0);
             Address address = addressMapper.selectList(new QueryWrapper<Address>().eq("user_id", userId)).get(0);
             if (address == null) {
                 throw new IllegalArgumentException("Address not found");
@@ -170,7 +156,6 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
             addressId = address.getAddressId();
         }
         // 生成每个seller的订单
-        // Order tempOrder = BeanUtil.toBean(orderCreateVO, Order.class);
         List<String> orderIds = new ArrayList<>();
         for (Map.Entry<String, List<OrderItem>> entry : orderItemListMap.entrySet()) {
             // 创建订单
