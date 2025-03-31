@@ -19,10 +19,7 @@ public interface OrderItemService extends IService<OrderItem> {
     OrderItem getOrderItemById(String orderItemId);
     List<OrderItem> getOrderItemByOrderId(String orderId);
     String addOrderItem(OrderItem orderItem);
-<<<<<<< HEAD
-=======
 
     // 卖家
     getOrderItemResponse getOrderItemBySeller(String userId);
->>>>>>> upstream/dev
 }

@@ -7,19 +7,13 @@ import cn.edu.xidian.tafei_mall.model.entity.Product;
 import cn.edu.xidian.tafei_mall.model.vo.Response.Seller.OrderItemResponse;
 import cn.edu.xidian.tafei_mall.model.vo.Response.Seller.getOrderItemResponse;
 import cn.edu.xidian.tafei_mall.service.OrderItemService;
-<<<<<<< HEAD
-=======
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
->>>>>>> upstream/dev
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-<<<<<<< HEAD
-=======
 import java.util.ArrayList;
->>>>>>> upstream/dev
 import java.util.List;
 
 /**
@@ -34,11 +28,8 @@ import java.util.List;
 public class OrderItemServiceImpl extends ServiceImpl<OrderItemMapper, OrderItem> implements OrderItemService {
     @Autowired
     private OrderItemMapper orderItemMapper;
-<<<<<<< HEAD
-=======
     @Autowired
     private ProductMapper productMapper;
->>>>>>> upstream/dev
 
     @Override
     public OrderItem getOrderItemById(String orderItemId){
@@ -55,8 +46,6 @@ public class OrderItemServiceImpl extends ServiceImpl<OrderItemMapper, OrderItem
         orderItemMapper.insert(orderItem);
         return orderItem.getOrderItemId();
     }
-<<<<<<< HEAD
-=======
 
     @Override
     public getOrderItemResponse getOrderItemBySeller(String userId){
@@ -71,5 +60,4 @@ public class OrderItemServiceImpl extends ServiceImpl<OrderItemMapper, OrderItem
         }
         return new getOrderItemResponse(orderItemResponses);
     }
->>>>>>> upstream/dev
 }
