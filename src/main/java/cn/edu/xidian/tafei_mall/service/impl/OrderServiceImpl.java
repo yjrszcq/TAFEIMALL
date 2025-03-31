@@ -1,5 +1,6 @@
 package cn.edu.xidian.tafei_mall.service.impl;
 
+
 import cn.edu.xidian.tafei_mall.mapper.AddressMapper;
 import cn.edu.xidian.tafei_mall.mapper.CartItemMapper;
 import cn.edu.xidian.tafei_mall.mapper.CartMapper;
@@ -12,9 +13,9 @@ import cn.edu.xidian.tafei_mall.model.vo.Response.Seller.updateOrderResponse;
 import cn.edu.xidian.tafei_mall.service.*;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import org.jetbrains.annotations.Contract;
-import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.lang.Contract;
+import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -38,20 +39,22 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
     @Autowired
     private ProductService productService;
     /* 由于Service层的Cart和Address不完整，暂时用Mapper层的方法代替
+
     @Autowired
     private CartService cartService;
     @Autowired
     private CartItemService cartItemService;
     @Autowired
     private AddressService addressService;
+
      */
     @Autowired
     private CartMapper cartMapper;
     @Autowired
     private CartItemMapper cartItemMapper;
+
     @Autowired
     private AddressMapper addressMapper;
-
     /**
      * 获取订单(内部使用)
      * @param orderId 订单ID
@@ -68,8 +71,9 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
      * @return 订单详情列表
      */
     @Override
+
     public getOrderBuyerResponse getOrderByCustomer(String userId){
-        List <Order> orders = orderMapper.selectList(new QueryWrapper<Order>().eq("user_id", userId));
+        List <Order> orders = orderMapper.findByUserId(userId);
         if (orders.isEmpty()) {
             return null;
         }
@@ -88,6 +92,7 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
      * @return 订单详情列表
      */
     @Override
+
     public getOrderBuyerResponse getOrderByCustomer(String OrderId, String userId) {
         Order order = orderMapper.selectById(OrderId);
         if (order == null) {
@@ -97,6 +102,7 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
             throw new IllegalArgumentException("Order does not belong to current user");
         }
         // 获取订单项
+
         List<OrderBuyerResponse> orderRespons = new ArrayList<>();
         orderRespons.add(OrderDetailGenerator(order));
         return new getOrderBuyerResponse(orderRespons);
@@ -110,6 +116,7 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
      * @return 订单ID
      */
     @Override
+
     public createOrderBuyerResponse createOrder(String cartId, OrderCreateVO orderCreateVO, String userId) {
         // Cart cart = cartService.getCartById(cartId);
         Cart cart = cartMapper.selectById(cartId);
@@ -125,13 +132,16 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
         if (cartItems.isEmpty()) {
             throw new IllegalArgumentException("Cart is empty");
         }
+
         // 将所有购物车项按照卖家分开，每个商家分别生成一个List<OrderItem>
         Map<String, List<OrderItem>> orderItemListMap = new HashMap<>();
         for (CartItem cartItem : cartItems) {
+
             Optional<Product> product = productService.getProductById(cartItem.getProductId());
             if (product.isEmpty()) {
                 throw new IllegalArgumentException("Invalid product ID");
             }
+
             String sellerId = product.get().getSellerId();
             if (!orderItemListMap.containsKey(sellerId)) {
                 orderItemListMap.put(sellerId, new ArrayList<>());
@@ -171,6 +181,7 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
             order.setStatus("pending");
             order.setCreatedAt(LocalDateTime.now());
             order.setUpdatedAt(LocalDateTime.now());
+            order.setOrderId(UUID.randomUUID().toString());
             orderMapper.insert(order);
             orderIds.add(order.getOrderId());
             // 生成订单项
@@ -178,6 +189,7 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
             BigDecimal totalAmount = BigDecimal.ZERO;
             for (OrderItem orderItem : entry.getValue()) {
                 orderItem.setOrderId(orderId);
+                orderItem.setOrderItemId(UUID.randomUUID().toString());
                 orderItemService.addOrderItem(orderItem);
                 totalAmount = totalAmount.add(orderItem.getPrice());
             }
@@ -187,6 +199,7 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
         }
         return new createOrderBuyerResponse(orderIds);
     }
+
 
     /**
      * 取消订单
@@ -208,7 +221,6 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
         }
         // 更改订单状态为已取消
         order.setStatus("canceled");
-        order.setUpdatedAt(LocalDateTime.now());
         // 提交
         orderMapper.updateById(order);
         return true;
@@ -276,7 +288,7 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
 
     // 生成订单详情，class内部使用
     @Contract("_ -> new")
-    private @NotNull OrderBuyerResponse OrderDetailGenerator(@NotNull Order order) {
+    private @NonNull OrderBuyerResponse OrderDetailGenerator(@NonNull Order order) {
         List<OrderItemBuyerResponse> orderItemBuyerResponses = new ArrayList<>();
         List<OrderItem> orderItems = orderItemService.getOrderItemByOrderId(order.getOrderId());
         for (OrderItem orderItem : orderItems) {
@@ -287,6 +299,7 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
             orderItemBuyerResponses.add(new OrderItemBuyerResponse(orderItem.getProductId(), product.get().getName(), orderItem.getQuantity(), orderItem.getPrice()));
         }
         return new OrderBuyerResponse(order.getOrderId(), order.getStatus(), new getOrderItemBuyerResponse(orderItemBuyerResponses));
+
     }
 
 }

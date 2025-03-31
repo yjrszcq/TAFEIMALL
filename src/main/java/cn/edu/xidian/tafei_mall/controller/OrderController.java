@@ -3,10 +3,9 @@ package cn.edu.xidian.tafei_mall.controller;
 
 import cn.edu.xidian.tafei_mall.model.entity.User;
 import cn.edu.xidian.tafei_mall.model.vo.OrderCreateVO;
-import cn.edu.xidian.tafei_mall.model.vo.Response.Order.OrderIdResponse;
-import cn.edu.xidian.tafei_mall.model.vo.Response.Order.MessageResponse;
 import cn.edu.xidian.tafei_mall.model.vo.Response.Buyer.createOrderBuyerResponse;
 import cn.edu.xidian.tafei_mall.model.vo.Response.Buyer.getOrderBuyerResponse;
+import cn.edu.xidian.tafei_mall.model.vo.Response.Order.MessageResponse;
 import cn.edu.xidian.tafei_mall.service.OrderService;
 import cn.edu.xidian.tafei_mall.service.UserService;
 import io.swagger.annotations.ApiKeyAuthDefinition;
@@ -30,7 +29,7 @@ public class OrderController {
      * @param sessionId Session ID
      * @return 订单详情
      */
-    @GetMapping("/search")
+    @GetMapping("")
     public ResponseEntity<?> searchOrder(@RequestHeader("Session-Id") String sessionId,
                                          @RequestParam(required = false, defaultValue = "-1") String orderId) {
         try{
@@ -96,7 +95,7 @@ public class OrderController {
             if (!flag) {
                 return new ResponseEntity<>(new MessageResponse("取消失败"), HttpStatus.BAD_REQUEST);
             }
-            return new ResponseEntity<>(new OrderIdResponse(orderId), HttpStatus.OK);
+            return ResponseEntity.noContent().build();
         } catch (Exception e) {
             return new ResponseEntity<>(new MessageResponse(e.getMessage()), HttpStatus.BAD_REQUEST);
         }

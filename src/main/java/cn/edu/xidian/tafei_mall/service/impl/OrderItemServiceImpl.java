@@ -28,6 +28,7 @@ import java.util.List;
 public class OrderItemServiceImpl extends ServiceImpl<OrderItemMapper, OrderItem> implements OrderItemService {
     @Autowired
     private OrderItemMapper orderItemMapper;
+
     @Autowired
     private ProductMapper productMapper;
 
