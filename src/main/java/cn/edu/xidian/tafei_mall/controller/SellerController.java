@@ -4,9 +4,16 @@ package cn.edu.xidian.tafei_mall.controller;
 import cn.edu.xidian.tafei_mall.model.entity.User;
 import cn.edu.xidian.tafei_mall.model.vo.*;
 import cn.edu.xidian.tafei_mall.model.vo.Response.Order.MessageResponse;
+<<<<<<< HEAD
 import cn.edu.xidian.tafei_mall.model.vo.Response.Order.getOrderResponse;
+=======
+import cn.edu.xidian.tafei_mall.model.vo.Response.Buyer.getOrderBuyerResponse;
+>>>>>>> upstream/dev
 import cn.edu.xidian.tafei_mall.model.vo.Response.Seller.addProductResponse;
+import cn.edu.xidian.tafei_mall.model.vo.Response.Seller.getOrderItemResponse;
 import cn.edu.xidian.tafei_mall.model.vo.Response.Seller.getProductResponse;
+import cn.edu.xidian.tafei_mall.model.vo.Response.Seller.updateOrderResponse;
+import cn.edu.xidian.tafei_mall.service.OrderItemService;
 import cn.edu.xidian.tafei_mall.service.ProductService;
 import cn.edu.xidian.tafei_mall.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -42,6 +49,12 @@ public class SellerController {
     @Autowired
     private OrderService orderService;
 
+<<<<<<< HEAD
+=======
+    @Autowired
+    private OrderItemService orderItemService;
+
+>>>>>>> upstream/dev
     @PostMapping("/products")
     public ResponseEntity<?> addProduct(@RequestBody ProductVO productVO, @RequestHeader("Session-Id") String sessionId) {
         // 检查是否登录
@@ -117,7 +130,28 @@ public class SellerController {
             if (user == null) {
                 return new ResponseEntity<>(new MessageResponse("用户不存在"), HttpStatus.UNAUTHORIZED);
             }
+<<<<<<< HEAD
             getOrderResponse response = orderService.getOrderBySeller(user.getUserId());
+=======
+            getOrderItemResponse response = orderItemService.getOrderItemBySeller(user.getUserId());
+            return ResponseEntity.ok().body(response);
+        } catch (Exception e) {
+            return new ResponseEntity<>(new MessageResponse(e.getMessage()), HttpStatus.BAD_REQUEST);
+        }
+    }
+
+    @GetMapping("/orders/{orderId}")
+    public ResponseEntity<?> updateOrder(@RequestHeader("Session-Id") String sessionId, @PathVariable String orderId, @RequestBody OrderUpdateVO orderUpdateVO) {
+        try{
+            if (sessionId == null) {
+                return new ResponseEntity<>(new MessageResponse("未登录"), HttpStatus.UNAUTHORIZED);
+            }
+            User user = userService.getUserInfo(sessionId);
+            if (user == null) {
+                return new ResponseEntity<>(new MessageResponse("用户不存在"), HttpStatus.UNAUTHORIZED);
+            }
+            updateOrderResponse response = orderService.updateOrderBySeller(orderId, orderUpdateVO, user.getUserId());
+>>>>>>> upstream/dev
             return ResponseEntity.ok().body(response);
         } catch (Exception e) {
             return new ResponseEntity<>(new MessageResponse(e.getMessage()), HttpStatus.BAD_REQUEST);
