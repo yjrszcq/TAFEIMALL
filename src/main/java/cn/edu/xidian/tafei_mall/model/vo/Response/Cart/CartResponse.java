@@ -11,12 +11,12 @@ import java.util.List;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class CartResponse {
     private final String cartId;
-    private final List<CartItem> cartItems;
+    private final List<CartItem> items;
     private final double total;
 
-    public CartResponse(String cartId, List<CartItem> cartItems, double total) {
+    public CartResponse(String cartId, List<CartItem> items, double total) {
         this.cartId = cartId;
-        this.cartItems = cartItems;
+        this.items = items;
         this.total = total;
     }
 }
