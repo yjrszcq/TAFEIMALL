@@ -21,7 +21,7 @@ public interface AddressService extends IService<Address> {
 
     getAddressResponse getAddress(String sessionId);
 
-    void updateAddress(AddressUpdateVO addressUpdate, String sessionId);
+    void updateAddress(AddressUpdateVO addressUpdate, String sessionId, String addressId);
 
-    void deleteAddress(Integer addressId, String sessionId);
+    void deleteAddress(String addressId, String sessionId);
 }
