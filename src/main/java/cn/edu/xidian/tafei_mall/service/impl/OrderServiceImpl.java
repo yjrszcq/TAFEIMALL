@@ -255,7 +255,7 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
             throw new RuntimeException("Order not found");
         }
        if (!order.getSellerId().equals(userId)) {
-            throw new IllegalArgumentException("Order does not belong to current user");
+            throw new IllegalArgumentException("Order does not belong to current seller");
         }
         // 更新订单状态
         switch (orderUpdateVO.getAction()) {
