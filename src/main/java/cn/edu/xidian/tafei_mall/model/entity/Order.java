@@ -38,6 +38,10 @@ public class Order implements Serializable {
     @TableField("user_id")
     private String userId;
 
+    @ApiModelProperty("卖家ID")
+    @TableField("seller_id")
+    private String sellerId;
+
     @ApiModelProperty("总金额")
     @TableField("total_amount")
     private BigDecimal totalAmount;

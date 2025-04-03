@@ -1,106 +1,159 @@
-CREATE TABLE `address` (
-                           `address_id` varchar(36) NOT NULL COMMENT '地址ID',
-                           `user_id` varchar(36) NOT NULL COMMENT '用户ID',
-                           `address` varchar(200) NOT NULL COMMENT '详细地址',
-                           `city` varchar(50) NOT NULL COMMENT '城市',
-                           `postal_code` varchar(10) NOT NULL COMMENT '邮政编码',
-                           `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
-                           `updated_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
-                           PRIMARY KEY (`address_id`),
-                           KEY `idx_user_id` (`user_id`),
-                           CONSTRAINT `fk_address_user` FOREIGN KEY (`user_id`) REFERENCES `user` (`user_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='用户地址表'
+create table TAFEI_MALL.user
+(
+    user_id    varchar(36)                        not null comment '用户ID'
+        primary key,
+    username   varchar(50)                        not null comment '用户名',
+    password   varchar(100)                       not null comment '密码',
+    email      varchar(100)                       not null comment '邮箱',
+    created_at datetime default CURRENT_TIMESTAMP not null comment '创建时间',
+    updated_at datetime default CURRENT_TIMESTAMP not null on update CURRENT_TIMESTAMP comment '更新时间',
+    constraint uniq_email
+        unique (email),
+    constraint uniq_username
+        unique (username)
+)
+    comment '用户表';
 
-CREATE TABLE `cart` (
-                        `cart_id` varchar(36) NOT NULL COMMENT '购物车ID',
-                        `user_id` varchar(36) NOT NULL COMMENT '用户ID',
-                        `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
-                        `updated_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
-                        PRIMARY KEY (`cart_id`),
-                        UNIQUE KEY `uniq_user_id` (`user_id`),
-                        CONSTRAINT `fk_cart_user` FOREIGN KEY (`user_id`) REFERENCES `user` (`user_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='购物车表'
+create table TAFEI_MALL.address
+(
+    address_id  varchar(36)                        not null comment '地址ID'
+        primary key,
+    user_id     varchar(36)                        not null comment '用户ID',
+    address     varchar(200)                       not null comment '详细地址',
+    city        varchar(50)                        not null comment '城市',
+    postal_code varchar(10)                        not null comment '邮政编码',
+    created_at  datetime default CURRENT_TIMESTAMP not null comment '创建时间',
+    updated_at  datetime default CURRENT_TIMESTAMP not null on update CURRENT_TIMESTAMP comment '更新时间',
+    constraint fk_address_user
+        foreign key (user_id) references TAFEI_MALL.user (user_id)
+)
+    comment '用户地址表';
 
-CREATE TABLE `cart_item` (
-                             `cart_item_id` varchar(36) NOT NULL COMMENT '购物车项ID',
-                             `cart_id` varchar(36) NOT NULL COMMENT '购物车ID',
-                             `product_id` varchar(36) NOT NULL COMMENT '商品ID',
-                             `quantity` int NOT NULL COMMENT '数量',
-                             `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
-                             `updated_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
-                             PRIMARY KEY (`cart_item_id`),
-                             KEY `idx_cart_id` (`cart_id`),
-                             KEY `fk_cart_item_product` (`product_id`),
-                             CONSTRAINT `fk_cart_item_cart` FOREIGN KEY (`cart_id`) REFERENCES `cart` (`cart_id`),
-                             CONSTRAINT `fk_cart_item_product` FOREIGN KEY (`product_id`) REFERENCES `product` (`product_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='购物车项表'
+create index idx_user_id
+    on TAFEI_MALL.address (user_id);
 
-CREATE TABLE `order` (
-                         `order_id` varchar(36) NOT NULL COMMENT '订单ID',
-                         `user_id` varchar(36) NOT NULL COMMENT '用户ID',
-                         `total_amount` decimal(10,2) DEFAULT NULL COMMENT '总金额',
-                         `payment_method` varchar(20) DEFAULT NULL COMMENT '支付方式',
-                         `shipping_address_id` varchar(36) NOT NULL COMMENT '收货地址ID',
-                         `status` varchar(20) NOT NULL DEFAULT 'pending' COMMENT '订单状态',
-                         `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
-                         `updated_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
-                         PRIMARY KEY (`order_id`),
-                         KEY `idx_user_id` (`user_id`),
-                         KEY `fk_order_address` (`shipping_address_id`),
-                         CONSTRAINT `fk_order_address` FOREIGN KEY (`shipping_address_id`) REFERENCES `address` (`address_id`),
-                         CONSTRAINT `fk_order_user` FOREIGN KEY (`user_id`) REFERENCES `user` (`user_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='订单表'
+create table TAFEI_MALL.cart
+(
+    cart_id    varchar(36)                        not null comment '购物车ID'
+        primary key,
+    user_id    varchar(36)                        not null comment '用户ID',
+    created_at datetime default CURRENT_TIMESTAMP not null comment '创建时间',
+    updated_at datetime default CURRENT_TIMESTAMP not null on update CURRENT_TIMESTAMP comment '更新时间',
+    constraint uniq_user_id
+        unique (user_id),
+    constraint fk_cart_user
+        foreign key (user_id) references TAFEI_MALL.user (user_id)
+)
+    comment '购物车表';
 
-CREATE TABLE `order_item` (
-                              `order_item_id` varchar(36) NOT NULL COMMENT '订单项ID',
-                              `order_id` varchar(36) NOT NULL COMMENT '订单ID',
-                              `product_id` varchar(36) NOT NULL COMMENT '商品ID',
-                              `quantity` int NOT NULL COMMENT '数量',
-                              `price` decimal(10,2) NOT NULL COMMENT '单价',
-                              `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
-                              `updated_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
-                              PRIMARY KEY (`order_item_id`),
-                              KEY `idx_order_id` (`order_id`),
-                              KEY `fk_order_item_product` (`product_id`),
-                              CONSTRAINT `fk_order_item_order` FOREIGN KEY (`order_id`) REFERENCES `order` (`order_id`),
-                              CONSTRAINT `fk_order_item_product` FOREIGN KEY (`product_id`) REFERENCES `product` (`product_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='订单项表'
+create table TAFEI_MALL.`order`
+(
+    order_id            varchar(36)                           not null comment '订单ID'
+        primary key,
+    user_id             varchar(36)                           not null comment '用户ID',
+    seller_id           varchar(36)                           not null,
+    total_amount        decimal(10, 2)                        null comment '总金额',
+    payment_method      varchar(20)                           null comment '支付方式',
+    shipping_address_id varchar(36)                           not null comment '收货地址ID',
+    status              varchar(20) default 'pending'         not null comment '订单状态',
+    created_at          datetime    default CURRENT_TIMESTAMP not null comment '创建时间',
+    updated_at          datetime    default CURRENT_TIMESTAMP not null on update CURRENT_TIMESTAMP comment '更新时间',
+    constraint fk_order_address
+        foreign key (shipping_address_id) references TAFEI_MALL.address (address_id),
+    constraint fk_order_seller
+        foreign key (seller_id) references TAFEI_MALL.user (user_id),
+    constraint fk_order_user
+        foreign key (user_id) references TAFEI_MALL.user (user_id)
+)
+    comment '订单表';
 
-CREATE TABLE `product` (
-                           `product_id` varchar(36) NOT NULL COMMENT '商品ID',
-                           `name` varchar(100) NOT NULL COMMENT '商品名称',
-                           `description` text COMMENT '商品描述',
-                           `price` decimal(10,2) NOT NULL COMMENT '价格',
-                           `stock` int NOT NULL DEFAULT '0' COMMENT '库存',
-                           `is_free_shipping` tinyint(1) NOT NULL DEFAULT '0' COMMENT '是否包邮',
-                           `seller_id` varchar(36) NOT NULL COMMENT '卖家ID',
-                           `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
-                           `updated_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
-                           PRIMARY KEY (`product_id`),
-                           KEY `idx_seller_id` (`seller_id`),
-                           CONSTRAINT `fk_product_seller` FOREIGN KEY (`seller_id`) REFERENCES `user` (`user_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='商品表'
+create index idx_user_id
+    on TAFEI_MALL.`order` (user_id);
 
-CREATE TABLE `session` (
-                           `session_id` varchar(36) NOT NULL COMMENT '会话ID',
-                           `user_id` varchar(36) NOT NULL COMMENT '用户ID',
-                           `session_token` varchar(100) NOT NULL COMMENT '会话令牌',
-                           `expires_at` datetime NOT NULL COMMENT '过期时间',
-                           `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
-                           PRIMARY KEY (`session_id`),
-                           KEY `idx_user_id` (`user_id`),
-                           CONSTRAINT `fk_session_user` FOREIGN KEY (`user_id`) REFERENCES `user` (`user_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='会话表'
+create table TAFEI_MALL.product
+(
+    product_id       varchar(36)                          not null comment '商品ID'
+        primary key,
+    name             varchar(100)                         not null comment '商品名称',
+    description      text                                 null comment '商品描述',
+    price            decimal(10, 2)                       not null comment '价格',
+    stock            int        default 0                 not null comment '库存',
+    is_free_shipping tinyint(1) default 0                 not null comment '是否包邮',
+    seller_id        varchar(36)                          not null comment '卖家ID',
+    created_at       datetime   default CURRENT_TIMESTAMP not null comment '创建时间',
+    updated_at       datetime   default CURRENT_TIMESTAMP not null on update CURRENT_TIMESTAMP comment '更新时间',
+    constraint fk_product_seller
+        foreign key (seller_id) references TAFEI_MALL.user (user_id)
+)
+    comment '商品表';
 
-CREATE TABLE `user` (
-                        `user_id` varchar(36) NOT NULL COMMENT '用户ID',
-                        `username` varchar(50) NOT NULL COMMENT '用户名',
-                        `password` varchar(100) NOT NULL COMMENT '密码',
-                        `email` varchar(100) NOT NULL COMMENT '邮箱',
-                        `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
-                        `updated_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
-                        PRIMARY KEY (`user_id`),
-                        UNIQUE KEY `uniq_username` (`username`),
-                        UNIQUE KEY `uniq_email` (`email`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='用户表'
+create table TAFEI_MALL.cart_item
+(
+    cart_item_id varchar(36)                        not null comment '购物车项ID'
+        primary key,
+    cart_id      varchar(36)                        not null comment '购物车ID',
+    product_id   varchar(36)                        not null comment '商品ID',
+    quantity     int                                not null comment '数量',
+    created_at   datetime default CURRENT_TIMESTAMP not null comment '创建时间',
+    updated_at   datetime default CURRENT_TIMESTAMP not null on update CURRENT_TIMESTAMP comment '更新时间',
+    constraint fk_cart_item_cart
+        foreign key (cart_id) references TAFEI_MALL.cart (cart_id),
+    constraint fk_cart_item_product
+        foreign key (product_id) references TAFEI_MALL.product (product_id)
+)
+    comment '购物车项表';
+
+create index idx_cart_id
+    on TAFEI_MALL.cart_item (cart_id);
+
+create table TAFEI_MALL.order_item
+(
+    order_item_id varchar(36)                        not null comment '订单项ID'
+        primary key,
+    order_id      varchar(36)                        not null comment '订单ID',
+    product_id    varchar(36)                        not null comment '商品ID',
+    quantity      int                                not null comment '数量',
+    price         decimal(10, 2)                     not null comment '单价',
+    created_at    datetime default CURRENT_TIMESTAMP not null comment '创建时间',
+    updated_at    datetime default CURRENT_TIMESTAMP not null on update CURRENT_TIMESTAMP comment '更新时间',
+    constraint fk_order_item_order
+        foreign key (order_id) references TAFEI_MALL.`order` (order_id),
+    constraint fk_order_item_product
+        foreign key (product_id) references TAFEI_MALL.product (product_id)
+)
+    comment '订单项表';
+
+create index idx_order_id
+    on TAFEI_MALL.order_item (order_id);
+
+create index idx_seller_id
+    on TAFEI_MALL.product (seller_id);
+
+create table TAFEI_MALL.session
+(
+    session_id    varchar(36)                        not null comment '会话ID'
+        primary key,
+    user_id       varchar(36)                        not null comment '用户ID',
+    session_token varchar(100)                       not null comment '会话令牌',
+    expires_at    datetime                           not null comment '过期时间',
+    created_at    datetime default CURRENT_TIMESTAMP not null comment '创建时间',
+    constraint fk_session_user
+        foreign key (user_id) references TAFEI_MALL.user (user_id)
+)
+    comment '会话表';
+
+create index idx_user_id
+    on TAFEI_MALL.session (user_id);
+
+create table TAFEI_MALL.t_image
+(
+    image_id   varchar(255)                        not null
+        primary key,
+    image_path varchar(255)                        not null,
+    product_id varchar(255)                        not null,
+    created_at timestamp default (now())           not null,
+    updated_at timestamp default CURRENT_TIMESTAMP not null on update CURRENT_TIMESTAMP,
+    constraint fk_image_product
+        foreign key (product_id) references TAFEI_MALL.product (product_id)
+);
 
