@@ -4,8 +4,8 @@ package cn.edu.xidian.tafei_mall.controller;
 import cn.edu.xidian.tafei_mall.model.entity.User;
 import cn.edu.xidian.tafei_mall.model.vo.*;
 import cn.edu.xidian.tafei_mall.model.vo.Response.Order.MessageResponse;
+import cn.edu.xidian.tafei_mall.model.vo.Response.Order.getOrderResponse;
 import cn.edu.xidian.tafei_mall.model.vo.Response.Seller.addProductResponse;
-import cn.edu.xidian.tafei_mall.model.vo.Response.Seller.getOrderItemResponse;
 import cn.edu.xidian.tafei_mall.model.vo.Response.Seller.getProductResponse;
 import cn.edu.xidian.tafei_mall.model.vo.Response.Seller.updateOrderResponse;
 import cn.edu.xidian.tafei_mall.service.OrderItemService;
@@ -122,7 +122,7 @@ public class SellerController {
             if (user == null) {
                 return new ResponseEntity<>(new MessageResponse("用户不存在"), HttpStatus.UNAUTHORIZED);
             }
-            getOrderItemResponse response = orderItemService.getOrderItemBySeller(user.getUserId());
+            getOrderResponse response = orderService.getOrderBySeller(user.getUserId());
             return ResponseEntity.ok().body(response);
         } catch (Exception e) {
             return new ResponseEntity<>(new MessageResponse(e.getMessage()), HttpStatus.BAD_REQUEST);

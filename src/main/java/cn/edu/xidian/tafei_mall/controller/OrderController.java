@@ -3,8 +3,8 @@ package cn.edu.xidian.tafei_mall.controller;
 
 import cn.edu.xidian.tafei_mall.model.entity.User;
 import cn.edu.xidian.tafei_mall.model.vo.OrderCreateVO;
-import cn.edu.xidian.tafei_mall.model.vo.Response.Buyer.createOrderBuyerResponse;
-import cn.edu.xidian.tafei_mall.model.vo.Response.Buyer.getOrderBuyerResponse;
+import cn.edu.xidian.tafei_mall.model.vo.Response.Buyer.createOrderResponse;
+import cn.edu.xidian.tafei_mall.model.vo.Response.Order.getOrderResponse;
 import cn.edu.xidian.tafei_mall.model.vo.Response.Order.MessageResponse;
 import cn.edu.xidian.tafei_mall.service.OrderService;
 import cn.edu.xidian.tafei_mall.service.UserService;
@@ -41,10 +41,10 @@ public class OrderController {
                 return new ResponseEntity<>(new MessageResponse("用户不存在"), HttpStatus.UNAUTHORIZED);
             }
             if (orderId.equals("-1")) {
-                getOrderBuyerResponse response = orderService.getOrderByCustomer(user.getUserId());
+                getOrderResponse response = orderService.getOrderByCustomer(user.getUserId());
                 return new ResponseEntity<>(response, HttpStatus.OK);
             } else {
-                getOrderBuyerResponse response = orderService.getOrderByCustomer(orderId, user.getUserId());
+                getOrderResponse response = orderService.getOrderByCustomer(orderId, user.getUserId());
                 return new ResponseEntity<>(response, HttpStatus.OK);
             }
         } catch (Exception e) {
@@ -69,7 +69,7 @@ public class OrderController {
             if (user == null) {
                 return new ResponseEntity<>(new MessageResponse("用户不存在"), HttpStatus.UNAUTHORIZED);
             }
-            createOrderBuyerResponse response = orderService.createOrder(cartId, orderCreateVO, user.getUserId());
+            createOrderResponse response = orderService.createOrder(cartId, orderCreateVO, user.getUserId());
             return new ResponseEntity<>(response, HttpStatus.OK);
         } catch (Exception e) {
             return new ResponseEntity<>(new MessageResponse(e.getMessage()), HttpStatus.BAD_REQUEST);

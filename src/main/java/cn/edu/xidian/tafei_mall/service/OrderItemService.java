@@ -1,7 +1,7 @@
 package cn.edu.xidian.tafei_mall.service;
 
 import cn.edu.xidian.tafei_mall.model.entity.OrderItem;
-import cn.edu.xidian.tafei_mall.model.vo.Response.Seller.getOrderItemResponse;
+import cn.edu.xidian.tafei_mall.model.vo.Response.Order.getOrderItemResponse;
 import com.baomidou.mybatisplus.extension.service.IService;
 
 import java.util.List;
