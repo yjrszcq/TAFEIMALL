@@ -116,11 +116,9 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
         if (cartItems.isEmpty()) {
             throw new IllegalArgumentException("Cart is empty");
         }
-
         // 将所有购物车项按照卖家分开，每个商家分别生成一个List<OrderItem>
         Map<String, List<OrderItem>> orderItemListMap = new HashMap<>();
         for (CartItem cartItem : cartItems) {
-
             Optional<Product> product = productService.getProductById(cartItem.getProductId());
             if (product.isEmpty()) {
                 throw new IllegalArgumentException("Invalid product ID");
