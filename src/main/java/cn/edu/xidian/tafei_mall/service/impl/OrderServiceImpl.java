@@ -295,7 +295,8 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
     /*----------------------内部方法----------------------*/
 
     /**
-     * 生成订单ID
+     * 生成订单列表
+     * @param orders 订单列表
      * @return 订单ID
      */
     @Contract("_ -> new")
