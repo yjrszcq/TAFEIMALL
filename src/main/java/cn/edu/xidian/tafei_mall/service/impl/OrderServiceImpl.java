@@ -232,7 +232,7 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
             return new getOrderResponse(null);
         }
         if (!order.getSellerId().equals(userId)) {
-            throw new IllegalArgumentException("Order does not belong to current user");
+            throw new IllegalArgumentException("Order does not belong to current seller");
         }
         // 获取订单项
         List<OrderResponse> orderResponse = new ArrayList<>();
