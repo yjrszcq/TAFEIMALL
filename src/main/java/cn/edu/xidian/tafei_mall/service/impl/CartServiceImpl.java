@@ -15,7 +15,6 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.math.BigDecimal;
 import java.util.List;
 import java.util.UUID;
 
@@ -44,14 +43,18 @@ public class CartServiceImpl extends ServiceImpl<CartMapper, Cart> implements Ca
         if (cart == null) {
             return null;
         }
+        CartResponse response = new CartResponse(cart.getCartId());
         List<CartItem> cartItems = cartItemMapper.selectList(new QueryWrapper<CartItem>().eq("cart_id", cart.getCartId()));
-        double totalPrice = 0;
+        double totalPrice = 0.0;
         for (CartItem cartItem : cartItems) {
             Product product = productService.getById(cartItem.getProductId());
-            BigDecimal price = product.getPrice();
-            totalPrice += price.doubleValue() * cartItem.getQuantity();
+            if (product != null) {
+                response.putItem(cartItem.getCartItemId() ,product.getProductId(), product.getName(), cartItem.getQuantity() ,product.getPrice().doubleValue());
+                totalPrice += product.getPrice().doubleValue() * cartItem.getQuantity();
+            }
         }
-        return new CartResponse(cart.getCartId(),cartItems, totalPrice);
+        response.setTotal(totalPrice);
+        return response;
     }
 
     @Override
