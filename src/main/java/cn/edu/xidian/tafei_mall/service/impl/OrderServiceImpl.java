@@ -70,7 +70,8 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
      */
     @Override
     public getOrderResponse getOrderByCustomer(String userId){
-        List <Order> orders = orderMapper.findByUserId(userId);
+//        List <Order> orders = orderMapper.findByUserId(userId);
+        List<Order> orders = orderMapper.selectList(new QueryWrapper<Order>().eq("user_id", userId));
         return new getOrderResponse(OrderListGenerator(orders));
     }
 

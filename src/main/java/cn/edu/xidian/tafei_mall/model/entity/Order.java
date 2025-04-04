@@ -23,7 +23,7 @@ import lombok.Setter;
  */
 @Getter
 @Setter
-@TableName("order")
+@TableName("t_order")
 @ApiModel(value = "Order对象", description = "订单表")
 public class Order implements Serializable {
 
