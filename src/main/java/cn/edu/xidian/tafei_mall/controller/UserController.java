@@ -48,18 +48,18 @@ public class UserController {
         }
     }
 
-    @PutMapping("/address")
-    public ResponseEntity<?> addAddress(@RequestBody AddressUpdateVO addressUpdate, @RequestHeader("Session-Id") String sessionId, @RequestParam("addressId") String addressId){
+    @PutMapping("/address/{addressId}")
+    public ResponseEntity<?> addAddress(@RequestBody AddressUpdateVO addressUpdate, @RequestHeader("Session-Id") String sessionId, @PathVariable String addressId){
         try{
-            addressService.updateAddress(addressUpdate, sessionId);
+            addressService.updateAddress(addressUpdate, sessionId, addressId);
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         }catch (Exception e) {
             return new ResponseEntity<>(new AddressResponse("地址更新失败"), HttpStatus.BAD_REQUEST);
         }
     }
 
-    @DeleteMapping("/address")
-    public ResponseEntity<?> deleteAddress(@RequestHeader("Session-Id") String sessionId, @RequestParam("addressId") Integer addressId){
+    @DeleteMapping("/address/{addressId}")
+    public ResponseEntity<?> deleteAddress(@RequestHeader("Session-Id") String sessionId, @PathVariable String addressId){
         try{
             addressService.deleteAddress(addressId, sessionId);
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);

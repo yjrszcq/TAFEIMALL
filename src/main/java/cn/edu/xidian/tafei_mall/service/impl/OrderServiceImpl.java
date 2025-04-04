@@ -1,13 +1,15 @@
 package cn.edu.xidian.tafei_mall.service.impl;
 
-import cn.edu.xidian.tafei_mall.mapper.AddressMapper;
-import cn.edu.xidian.tafei_mall.mapper.CartItemMapper;
-import cn.edu.xidian.tafei_mall.mapper.CartMapper;
+
+import cn.edu.xidian.tafei_mall.mapper.*;
 import cn.edu.xidian.tafei_mall.model.entity.*;
-import cn.edu.xidian.tafei_mall.mapper.OrderMapper;
 import cn.edu.xidian.tafei_mall.model.vo.OrderCreateVO;
 import cn.edu.xidian.tafei_mall.model.vo.OrderUpdateVO;
 import cn.edu.xidian.tafei_mall.model.vo.Response.Buyer.*;
+import cn.edu.xidian.tafei_mall.model.vo.Response.Order.OrderItemResponse;
+import cn.edu.xidian.tafei_mall.model.vo.Response.Order.OrderResponse;
+import cn.edu.xidian.tafei_mall.model.vo.Response.Order.getOrderItemResponse;
+import cn.edu.xidian.tafei_mall.model.vo.Response.Order.getOrderResponse;
 import cn.edu.xidian.tafei_mall.model.vo.Response.Seller.updateOrderResponse;
 import cn.edu.xidian.tafei_mall.service.*;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
@@ -15,6 +17,7 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.lang.Contract;
 import org.springframework.lang.NonNull;
+import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -37,20 +40,16 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
     private OrderItemService orderItemService;
     @Autowired
     private ProductService productService;
-    /* 由于Service层的Cart和Address不完整，暂时用Mapper层的方法代替
-    @Autowired
-    private CartService cartService;
-    @Autowired
-    private CartItemService cartItemService;
-    @Autowired
-    private AddressService addressService;
-     */
     @Autowired
     private CartMapper cartMapper;
     @Autowired
     private CartItemMapper cartItemMapper;
     @Autowired
     private AddressMapper addressMapper;
+    @Autowired
+    private UserMapper userMapper;
+
+    /*----------------------同层调用----------------------*/
 
     /**
      * 获取订单(内部使用)
@@ -62,23 +61,17 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
         return orderMapper.selectById(orderId);
     }
 
+    /*----------------------买家视角----------------------*/
+
     /**
      * 获取订单详情(买家)
      * @param userId 用户ID
      * @return 订单详情列表
      */
     @Override
-    public getOrderBuyerResponse getOrderByCustomer(String userId){
+    public getOrderResponse getOrderByCustomer(String userId){
         List <Order> orders = orderMapper.findByUserId(userId);
-        if (orders.isEmpty()) {
-            return null;
-        }
-        // 获取订单项
-        List<OrderBuyerResponse> orderDetailResponses = new ArrayList<>();
-        for (Order order : orders) {
-            orderDetailResponses.add(OrderDetailGenerator(order));
-        }
-        return new getOrderBuyerResponse(orderDetailResponses);
+        return new getOrderResponse(OrderListGenerator(orders));
     }
 
     /**
@@ -88,18 +81,18 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
      * @return 订单详情列表
      */
     @Override
-    public getOrderBuyerResponse getOrderByCustomer(String OrderId, String userId) {
+    public getOrderResponse getOrderByCustomer(String OrderId, String userId) {
         Order order = orderMapper.selectById(OrderId);
         if (order == null) {
-            return null;
+            return new getOrderResponse(null);
         }
         if (!order.getUserId().equals(userId)) {
             throw new IllegalArgumentException("Order does not belong to current user");
         }
         // 获取订单项
-        List<OrderBuyerResponse> orderRespons = new ArrayList<>();
-        orderRespons.add(OrderDetailGenerator(order));
-        return new getOrderBuyerResponse(orderRespons);
+        List<OrderResponse> orderResponse = new ArrayList<>();
+        orderResponse.add(OrderDetailGenerator(order));
+        return new getOrderResponse(orderResponse);
     }
 
     /**
@@ -110,8 +103,7 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
      * @return 订单ID
      */
     @Override
-    public createOrderBuyerResponse createOrder(String cartId, OrderCreateVO orderCreateVO, String userId) {
-        // Cart cart = cartService.getCartById(cartId);
+    public createOrderResponse createOrder(String cartId, OrderCreateVO orderCreateVO, String userId) {
         Cart cart = cartMapper.selectById(cartId);
         if (cart == null) {
             throw new IllegalArgumentException("Invalid cart ID");
@@ -120,7 +112,6 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
             throw new IllegalArgumentException("Cart does not belong to current user");
         }
         // 获取购物车
-        // List<CartItem> cartItems = cartItemService.getCartItemsByCartId(cartId);
         List<CartItem> cartItems = cartItemMapper.selectList(new QueryWrapper<CartItem>().eq("cart_id", cartId));
         if (cartItems.isEmpty()) {
             throw new IllegalArgumentException("Cart is empty");
@@ -132,6 +123,7 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
             if (product.isEmpty()) {
                 throw new IllegalArgumentException("Invalid product ID");
             }
+
             String sellerId = product.get().getSellerId();
             if (!orderItemListMap.containsKey(sellerId)) {
                 orderItemListMap.put(sellerId, new ArrayList<>());
@@ -146,13 +138,11 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
         String addressId;
         if (orderCreateVO != null) {
             addressId = orderCreateVO.getShippingAddressId();
-            // Address address = addressService.getAddressById(addressId);
             Address address = addressMapper.selectById(addressId);
             if (address == null) {
                 throw new IllegalArgumentException("Invalid address ID");
             }
         } else { // 如果没有传入地址ID，使用用户默认地址(默认为第一个地址)
-            // Address address = addressService.getAddressByUserId(userId).get(0);
             Address address = addressMapper.selectList(new QueryWrapper<Address>().eq("user_id", userId)).get(0);
             if (address == null) {
                 throw new IllegalArgumentException("Address not found");
@@ -160,13 +150,12 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
             addressId = address.getAddressId();
         }
         // 生成每个seller的订单
-        // Order tempOrder = BeanUtil.toBean(orderCreateVO, Order.class);
         List<String> orderIds = new ArrayList<>();
         for (Map.Entry<String, List<OrderItem>> entry : orderItemListMap.entrySet()) {
             // 创建订单
             Order order = new Order();
             order.setUserId(userId);
-            // order.setSellerId(entry.getKey());
+            order.setSellerId(entry.getKey());
             order.setShippingAddressId(addressId);
             order.setStatus("pending");
             order.setCreatedAt(LocalDateTime.now());
@@ -187,7 +176,7 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
             order.setTotalAmount(totalAmount);
             orderMapper.updateById(order);
         }
-        return new createOrderBuyerResponse(orderIds);
+        return new createOrderResponse(orderIds);
     }
 
     /**
@@ -215,6 +204,40 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
         return true;
     }
 
+    /*----------------------卖家视角----------------------*/
+
+    /**
+     * 获取订单详情(卖家)
+     * @param userId 卖家ID
+     * @return 订单详情列表
+     */
+    @Override
+    public getOrderResponse getOrderBySeller(String userId) {
+        List<Order> orders = orderMapper.selectList(new QueryWrapper<Order>().eq("seller_id", userId));
+        return new getOrderResponse(OrderListGenerator(orders));
+    }
+
+    /**
+     * 获取订单详情(卖家)
+     * @param orderId 订单ID
+     * @param userId 卖家ID
+     * @return 订单详情列表
+     */
+    @Override
+    public getOrderResponse getOrderBySeller(String orderId, String userId) {
+        Order order = orderMapper.selectById(orderId);
+        if (order == null) {
+            return new getOrderResponse(null);
+        }
+        if (!order.getSellerId().equals(userId)) {
+            throw new IllegalArgumentException("Order does not belong to current seller");
+        }
+        // 获取订单项
+        List<OrderResponse> orderResponse = new ArrayList<>();
+        orderResponse.add(OrderDetailGenerator(order));
+        return new getOrderResponse(orderResponse);
+    }
+
     /**
      * 更新订单状态
      * @param orderId 订单ID
@@ -229,16 +252,8 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
         if (order == null) {
             throw new RuntimeException("Order not found");
         }
-        List<OrderItem> orderItems = orderItemService.getOrderItemByOrderId(orderId);
-        if (orderItems.isEmpty()) {
-            throw new RuntimeException("Order is empty");
-        }
-        Optional<Product> product = productService.getProductById(orderItems.get(0).getProductId());
-        if (product.isEmpty()) {
-            throw new IllegalArgumentException("Product not exist");
-        }
-        if (!product.get().getSellerId().equals(userId)) {
-            throw new IllegalArgumentException("Order does not belong to current user");
+       if (!order.getSellerId().equals(userId)) {
+            throw new IllegalArgumentException("Order does not belong to current seller");
         }
         // 更新订单状态
         switch (orderUpdateVO.getAction()) {
@@ -275,19 +290,51 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
         }
     }
 
+    /*----------------------内部方法----------------------*/
+
+    /**
+     * 生成订单列表
+     * @param orders 订单列表
+     * @return 订单ID
+     */
+    @Contract("_ -> new")
+    private @Nullable List<OrderResponse> OrderListGenerator(@Nullable List <Order> orders) {
+        if (orders == null || orders.isEmpty()) {
+            return null;
+        }
+        // 获取订单项
+        List<OrderResponse> orderResponses = new ArrayList<>();
+        for (Order order : orders) {
+            orderResponses.add(OrderDetailGenerator(order));
+        }
+        return orderResponses;
+    }
+
+    /**
+     * 生成订单详情
+     * @param order 订单
+     * @return 订单详情
+     */
     // 生成订单详情，class内部使用
     @Contract("_ -> new")
-    private @NonNull OrderBuyerResponse OrderDetailGenerator(@NonNull Order order) {
-        List<OrderItemBuyerResponse> orderItemBuyerResponses = new ArrayList<>();
+    private @NonNull OrderResponse OrderDetailGenerator(@NonNull Order order) {
+        List<OrderItemResponse> orderItemResponses = new ArrayList<>();
+        // 获取买家和卖家信息
+        String userName = userMapper.selectById(order.getUserId()).getUsername();
+        String sellerName = userMapper.selectById(order.getSellerId()).getUsername();
+        // 获取订单项
         List<OrderItem> orderItems = orderItemService.getOrderItemByOrderId(order.getOrderId());
+        if (orderItems.isEmpty()) {
+            throw new IllegalArgumentException("OrderItem is empty");
+        }
         for (OrderItem orderItem : orderItems) {
             Optional<Product> product = productService.getProductById(orderItem.getProductId());
             if (product.isEmpty()) {
-                throw new IllegalArgumentException("Invalid product ID");
+                throw new IllegalArgumentException("Product not found");
             }
-            orderItemBuyerResponses.add(new OrderItemBuyerResponse(orderItem.getProductId(), product.get().getName(), orderItem.getQuantity(), orderItem.getPrice()));
+            orderItemResponses.add(new OrderItemResponse(orderItem.getOrderItemId(), orderItem.getProductId(), product.get().getName(), orderItem.getQuantity(), orderItem.getPrice()));
         }
-        return new OrderBuyerResponse(order.getOrderId(), order.getStatus(), new getOrderItemBuyerResponse(orderItemBuyerResponses));
+        // 生成订单详情
+        return new OrderResponse(order.getOrderId(), order.getStatus(), userName, sellerName, new getOrderItemResponse(orderItemResponses));
     }
-
 }

@@ -1,9 +1,17 @@
 package cn.edu.xidian.tafei_mall.controller;
 
+import cn.edu.xidian.tafei_mall.model.entity.User;
 import cn.edu.xidian.tafei_mall.model.vo.*;
+import cn.edu.xidian.tafei_mall.model.vo.Response.Cart.CartResponse;
+import cn.edu.xidian.tafei_mall.service.CartItemService;
+import cn.edu.xidian.tafei_mall.service.CartService;
+import cn.edu.xidian.tafei_mall.service.UserService;
+import cn.hutool.json.JSONUtil;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.http.*;
-import java.util.Map;
+
+import java.net.URI;
 
 
 /**
@@ -20,28 +28,77 @@ import java.util.Map;
 @RestController
 @RequestMapping("/api/cart")
 public class CartController {
+    @Autowired
+    private CartService cartService;
+
+    @Autowired
+    private CartItemService cartItemService;
+
+    @Autowired
+    private UserService userService;
 
     @GetMapping
-    public ResponseEntity<?> getCartContents() {
-        // Implement get cart contents logic
-        return ResponseEntity.ok("获取成功");
+    public ResponseEntity<?> getCartContents(@RequestHeader("Session-Id") String sessionId) {
+        try{
+            User user = checkSessionId(sessionId);
+            CartResponse cart = cartService.getCart(user.getUserId());
+            return new ResponseEntity<>(cart, HttpStatus.OK);
+        }catch (Exception e){
+            return new ResponseEntity<>(e, HttpStatus.BAD_REQUEST);
+        }
+
+
     }
 
     @PostMapping("/items")
-    public ResponseEntity<?> addItemToCart(@RequestBody CartItemAddVO cartItemAddVO) {
-        // Implement add item to cart logic
-        return ResponseEntity.status(HttpStatus.CREATED).body("添加成功");
+    public ResponseEntity<?> addItemToCart(@RequestBody CartItemAddVO cartItemAddVO, @RequestHeader("Session-Id") String sessionId) {
+        try {
+            User user = checkSessionId(sessionId);
+            if (user == null) {
+               return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+            }
+            cartService.addToCart(cartItemAddVO, user);
+            return ResponseEntity.created(URI.create("/api/cart")).body(JSONUtil.createObj().set("message", "商品添加成功"));
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(JSONUtil.createObj().set("message", e.getMessage()));
+        }
     }
 
     @PutMapping("/items/{itemId}")
-    public ResponseEntity<?> updateCartItem(@PathVariable String itemId, @RequestBody Map<String, Integer> update) {
-        // Implement update cart item logic
-        return ResponseEntity.ok("数量更新成功");
+    public ResponseEntity<?> updateCartItem(@PathVariable String itemId, @RequestBody CartItemUpdateVO cartItemUpdateVO, @RequestHeader("Session-Id") String sessionId) {
+        try {
+            User user = checkSessionId(sessionId);
+            if (user == null) {
+                return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+            }
+            cartItemService.updateCartItem(itemId, cartItemUpdateVO);
+            return ResponseEntity.ok(JSONUtil.createObj().set("message", "商品数量更新成功"));
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(JSONUtil.createObj().set("message", e.getMessage()));
+        }
+
     }
 
     @DeleteMapping("/items/{itemId}")
-    public ResponseEntity<?> deleteCartItem(@PathVariable String itemId) {
-        // Implement delete cart item logic
-        return ResponseEntity.noContent().build();
+    public ResponseEntity<?> deleteCartItem(@PathVariable String itemId, @RequestHeader("Session-Id") String sessionId) {
+        try {
+            User user = checkSessionId(sessionId);
+            if (user == null) {
+                return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+            }
+            cartItemService.deleteCartItem(itemId);
+            return ResponseEntity.noContent().build();
+        } catch (RuntimeException e) {
+            return ResponseEntity.unprocessableEntity().build();
+        }catch (Exception e) {
+            return ResponseEntity.badRequest().body(JSONUtil.createObj().set("message", e.getMessage()));
+        }
     }
+
+    private User checkSessionId(String sessionId) {
+        if (sessionId == null) {
+            throw new IllegalArgumentException("Session ID is required");
+        }
+        return userService.getUserInfo(sessionId);
+        }
 }

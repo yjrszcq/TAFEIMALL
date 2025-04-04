@@ -8,11 +8,12 @@ import cn.edu.xidian.tafei_mall.model.vo.Response.Address.getAddressResponse;
 import cn.edu.xidian.tafei_mall.service.AddressService;
 import cn.edu.xidian.tafei_mall.service.UserService;
 import cn.hutool.core.bean.BeanUtil;
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDateTime;
+import java.util.List;
 import java.util.UUID;
 
 /**
@@ -43,22 +44,32 @@ public class AddressServiceImpl extends ServiceImpl<AddressMapper, Address> impl
     @Override
     public getAddressResponse getAddress(String sessionId){
         User user=userService.getUserInfo(sessionId);
-        Address address=addressMapper.selectById(user.getUserId());
-        getAddressResponse getAddressResponse=new getAddressResponse();
-        BeanUtil.copyProperties(address,getAddressResponse);
-        return getAddressResponse;
+        List<Address> addresses = addressMapper.selectList(new QueryWrapper<Address>().eq("user_id", user.getUserId()));
+        if(addresses.isEmpty()){
+            return null;
+        }
+        getAddressResponse Response= new getAddressResponse();
+        for(Address address:addresses){
+            Response.addAddress(address.getAddressId(),address.getAddress(),address.getCity(),address.getPostalCode());
+        }
+        return Response;
     }
 
     @Override
-    public void updateAddress(AddressUpdateVO addressUpdateVO, String sessionId){
+    public void updateAddress(AddressUpdateVO addressUpdateVO, String sessionId, String addressId){
         User user=userService.getUserInfo(sessionId);
-        Address address=addressMapper.selectById(user.getUserId());
-        BeanUtil.copyProperties(addressUpdateVO,address);
+        if(!addressMapper.selectById(addressId).getUserId().equals(user.getUserId())){
+            throw new RuntimeException("没有权限修改该地址");
+        }
+        Address address=addressMapper.selectById(addressId);
+        address.setAddress(addressUpdateVO.getAddress());
+        address.setCity(addressUpdateVO.getCity());
+        address.setPostalCode(addressUpdateVO.getPostalCode());
         addressMapper.updateById(address);
     }
 
     @Override
-    public void deleteAddress(Integer addressId, String sessionId){
+    public void deleteAddress(String addressId, String sessionId){
         User user=userService.getUserInfo(sessionId);
         addressMapper.deleteById(user.getUserId());
     }
