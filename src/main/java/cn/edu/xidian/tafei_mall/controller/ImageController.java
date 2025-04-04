@@ -12,11 +12,9 @@ import org.springframework.util.StreamUtils;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
-import java.util.Base64;
 
 /**
  * <p>
@@ -87,7 +85,7 @@ public class ImageController {
             URI imagePath = imageService.uploadImage(productId, image);
             return ResponseEntity.created(imagePath).body(JSONUtil.createObj().set("imagePath", imagePath));
         } catch (Exception e) {
-            return ResponseEntity.status(500).build();
+            return ResponseEntity.status(500).body(e.getMessage());
         }
     }
 }
