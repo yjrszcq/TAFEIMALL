@@ -5,6 +5,10 @@ import cn.edu.xidian.tafei_mall.model.entity.Image;
 import com.baomidou.mybatisplus.extension.service.IService;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.URI;
+
 /**
  * <p>
  * 图片表 服务类
@@ -16,5 +20,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 public interface ImageService extends IService<Image> {
 
-    void uploadImage(String productId, MultipartFile file);
+    URI uploadImage(String productId, MultipartFile file) throws IOException;
+
+    InputStream getImage(String imagePath);
 }

@@ -30,12 +30,12 @@ public class Image implements Serializable {
     @Serial
     private static final long serialVersionUID = 1L;
 
-    @ApiModelProperty("图片ID")
-    @TableId("image_id")
-    private String imageId;
+//    @ApiModelProperty("图片ID")
+//    @TableId("image_id")
+//    private String imageId;
 
     @ApiModelProperty("图片URL")
-    @TableField("image_path")
+    @TableId("image_path")
     private String imagePath;
 
     @ApiModelProperty("图片所属商品ID")
