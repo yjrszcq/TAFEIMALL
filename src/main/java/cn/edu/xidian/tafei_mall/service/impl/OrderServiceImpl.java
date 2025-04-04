@@ -338,4 +338,30 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
         // 生成订单详情
         return new OrderResponse(order.getOrderId(), order.getStatus(), userName, sellerName, new getOrderItemResponse(orderItemResponses));
     }
+
+    /**
+     * 确认收货
+     * @param orderId 订单ID
+     * @return 是否成功
+     */
+
+    @Override
+    public boolean confirmOrder(String orderId, String userId) {
+        // 验证订单状态是否可以确认收货
+        Order order = getOrderById(orderId);
+        if (order == null) {
+            throw new RuntimeException("Order not found");
+        }
+        if (!order.getUserId().equals(userId)) {
+            throw new IllegalArgumentException("Order does not belong to current user");
+        }
+        if (!order.getStatus().equals("shipping")) {
+            throw new IllegalArgumentException("Order cannot be confirmed");
+        }
+        // 更改订单状态为已完成
+        order.setStatus("finished");
+        // 提交
+        orderMapper.updateById(order);
+        return true;
+    }
 }

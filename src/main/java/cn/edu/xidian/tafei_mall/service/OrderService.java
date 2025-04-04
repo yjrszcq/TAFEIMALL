@@ -28,4 +28,6 @@ public interface OrderService extends IService<Order> {
     getOrderResponse getOrderBySeller(String userId);
     getOrderResponse getOrderBySeller(String orderId, String userId);
     updateOrderResponse updateOrderBySeller(String orderId, OrderUpdateVO orderUpdateV, String userId);
+
+    boolean confirmOrder(String orderId, String userId);
 }

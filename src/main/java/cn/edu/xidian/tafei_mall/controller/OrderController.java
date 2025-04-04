@@ -100,4 +100,25 @@ public class OrderController {
             return new ResponseEntity<>(new MessageResponse(e.getMessage()), HttpStatus.BAD_REQUEST);
         }
     }
+
+    @PutMapping("/{orderId}/confirm")
+    public ResponseEntity<?> confirmOrder(@RequestHeader("Session-Id") String sessionId,
+                                         @PathVariable String orderId) {
+        try{
+            if (sessionId == null) {
+                return new ResponseEntity<>(new MessageResponse("未登录"), HttpStatus.UNAUTHORIZED);
+            }
+            User user = userService.getUserInfo(sessionId);
+            if (user == null) {
+                return new ResponseEntity<>(new MessageResponse("用户不存在"), HttpStatus.UNAUTHORIZED);
+            }
+            boolean flag = orderService.confirmOrder(orderId, user.getUserId());
+            if (!flag) {
+                return new ResponseEntity<>(new MessageResponse("确认失败"), HttpStatus.BAD_REQUEST);
+            }
+            return ResponseEntity.noContent().build();
+        } catch (Exception e) {
+            return new ResponseEntity<>(new MessageResponse(e.getMessage()), HttpStatus.BAD_REQUEST);
+        }
+    }
 }
