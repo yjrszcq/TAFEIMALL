@@ -13,3 +13,6 @@ mybatis-plus:
   global-config:
     db-config:
         id-type: auto
+
+web:
+    upload-path: D:/Code/TAFEI_MALL/image
