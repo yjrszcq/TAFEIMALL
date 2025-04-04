@@ -7,10 +7,10 @@ import java.util.List;
 
 @Getter
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class getOrderBuyerResponse {
-    private final List<OrderBuyerResponse> orders;
+public class createOrderResponse {
+    private final List<String> orderIds;
 
-    public getOrderBuyerResponse(List<OrderBuyerResponse> orders) {
-        this.orders = orders;
+    public createOrderResponse(List<String> orderIds) {
+        this.orderIds = orderIds;
     }
 }

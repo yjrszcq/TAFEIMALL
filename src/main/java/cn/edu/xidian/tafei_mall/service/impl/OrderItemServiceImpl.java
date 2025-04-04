@@ -4,8 +4,8 @@ import cn.edu.xidian.tafei_mall.mapper.ProductMapper;
 import cn.edu.xidian.tafei_mall.model.entity.OrderItem;
 import cn.edu.xidian.tafei_mall.mapper.OrderItemMapper;
 import cn.edu.xidian.tafei_mall.model.entity.Product;
-import cn.edu.xidian.tafei_mall.model.vo.Response.Seller.OrderItemResponse;
-import cn.edu.xidian.tafei_mall.model.vo.Response.Seller.getOrderItemResponse;
+import cn.edu.xidian.tafei_mall.model.vo.Response.Order.OrderItemResponse;
+import cn.edu.xidian.tafei_mall.model.vo.Response.Order.getOrderItemResponse;
 import cn.edu.xidian.tafei_mall.service.OrderItemService;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
@@ -28,8 +28,11 @@ import java.util.List;
 public class OrderItemServiceImpl extends ServiceImpl<OrderItemMapper, OrderItem> implements OrderItemService {
     @Autowired
     private OrderItemMapper orderItemMapper;
+
     @Autowired
     private ProductMapper productMapper;
+
+    /*----------------------同层调用----------------------*/
 
     @Override
     public OrderItem getOrderItemById(String orderItemId){
@@ -47,6 +50,8 @@ public class OrderItemServiceImpl extends ServiceImpl<OrderItemMapper, OrderItem
         return orderItem.getOrderItemId();
     }
 
+    /*----------------------卖家视角----------------------*/
+
     @Override
     public getOrderItemResponse getOrderItemBySeller(String userId){
         List<Product> products = productMapper.selectList(new LambdaQueryWrapper<Product>().eq(Product::getSellerId, userId));
@@ -55,7 +60,7 @@ public class OrderItemServiceImpl extends ServiceImpl<OrderItemMapper, OrderItem
         for (Product product : products) {
             List<OrderItem> orderItems = orderItemMapper.selectList(new QueryWrapper<OrderItem>().eq("product_id", product.getProductId()));
             for (OrderItem orderItem : orderItems) {
-                orderItemResponses.add(new OrderItemResponse(product.getProductId(), product.getName(), orderItem.getOrderId(), orderItem.getPrice(), orderItem.getOrderItemId()));
+                orderItemResponses.add(new OrderItemResponse(orderItem.getOrderItemId(), product.getProductId(), product.getName(), orderItem.getQuantity(), orderItem.getPrice()));
             }
         }
         return new getOrderItemResponse(orderItemResponses);
