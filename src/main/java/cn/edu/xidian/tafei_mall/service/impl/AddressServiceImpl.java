@@ -71,6 +71,6 @@ public class AddressServiceImpl extends ServiceImpl<AddressMapper, Address> impl
     @Override
     public void deleteAddress(String addressId, String sessionId){
         User user=userService.getUserInfo(sessionId);
-        addressMapper.deleteById(user.getUserId());
+        addressMapper.deleteById(addressId);
     }
 }
