@@ -103,9 +103,8 @@ create index idx_user_id
 
 create table t_image
 (
-    image_id   varchar(255)                        not null
+    image_path varchar(255)                        not null
         primary key,
-    image_path varchar(255)                        not null,
     product_id varchar(255)                        not null,
     created_at timestamp default (now())           not null,
     updated_at timestamp default CURRENT_TIMESTAMP not null on update CURRENT_TIMESTAMP,
