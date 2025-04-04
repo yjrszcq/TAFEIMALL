@@ -62,11 +62,7 @@ public class SellerController {
         return ResponseEntity.created(URI.create("product")).body(new addProductResponse(productId));
     }
 
-    @PutMapping("/orders/{orderId}")
-    public ResponseEntity<?> manageOrder(@PathVariable String orderId, @RequestBody Map<String, String> action) {
-        // Implement manage order logic
-        return ResponseEntity.ok("操作成功");
-    }
+
 
     @PutMapping("/products/{productId}")
     public ResponseEntity<?> updateProduct(@PathVariable String productId, @RequestBody ProductVO productVO, @RequestHeader("Session-Id") String sessionId) {
@@ -129,7 +125,7 @@ public class SellerController {
         }
     }
 
-    @GetMapping("/orders/{orderId}")
+    @PutMapping("/orders/{orderId}")
     public ResponseEntity<?> updateOrder(@RequestHeader("Session-Id") String sessionId, @PathVariable String orderId, @RequestBody OrderUpdateVO orderUpdateVO) {
         try{
             if (sessionId == null) {

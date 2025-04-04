@@ -258,7 +258,7 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
         }
         // 更新订单状态
         switch (orderUpdateVO.getAction()) {
-            case "ship": { // to 'shipping'
+            case "shipping": { // to 'shipping'
                 if (!order.getStatus().equals("paid")) {
                     throw new IllegalArgumentException("Order cannot be shipping");
                 }
@@ -273,7 +273,7 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
                 }
 
             }
-            case "cancel": { // to 'canceled'
+            case "canceled": { // to 'canceled'
                 if (!order.getStatus().equals("pending") && !order.getStatus().equals("paid")) {
                     throw new IllegalArgumentException("Order cannot be cancelled");
                 }
