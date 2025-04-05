@@ -8,6 +8,8 @@ import java.io.Serial;
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.List;
+
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Getter;
@@ -65,4 +67,8 @@ public class Product implements Serializable {
     @ApiModelProperty("更新时间")
     @TableField("updated_at")
     private LocalDateTime updatedAt;
+
+    @ApiModelProperty("商品图片URL列表")
+    @TableField(exist = false)
+    private List<String> mainPictures;
 }
