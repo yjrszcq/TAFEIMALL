@@ -4,6 +4,7 @@ import cn.edu.xidian.tafei_mall.mapper.ImageMapper;
 import cn.edu.xidian.tafei_mall.model.entity.Image;
 import cn.edu.xidian.tafei_mall.model.entity.Product;
 import cn.edu.xidian.tafei_mall.mapper.ProductMapper;
+import cn.edu.xidian.tafei_mall.model.vo.ProductSimpleVO;
 import cn.edu.xidian.tafei_mall.model.vo.ProductVO;
 import cn.edu.xidian.tafei_mall.model.vo.Response.Seller.getProductResponse;
 import cn.edu.xidian.tafei_mall.service.ImageService;
@@ -41,51 +42,60 @@ public class ProductServiceImpl extends ServiceImpl<ProductMapper, Product> impl
     @Resource
     private ImageMapper imageMapper;
 
-   @Override
-   public Map<String, Object> searchProducts(String keyword, int page, int limit) {
-       if (page <= 0) {
-           page = 1;
-       }
-       if (limit <= 0) {
-           limit = 10;
-       }
+  @Override
+  public Map<String, Object> searchProducts(String keyword, int page, int limit) {
+      if (page <= 0) page = 1;
+      if (limit <= 0) limit = 10;
 
-       LambdaQueryWrapper<Product> queryWrapper = new LambdaQueryWrapper<>();
+      LambdaQueryWrapper<Product> queryWrapper = new LambdaQueryWrapper<>();
+      if (keyword != null && !keyword.trim().isEmpty()) {
+          queryWrapper.like(Product::getName, keyword);
+      }
 
-       if (keyword != null && !keyword.trim().isEmpty()) {
-           queryWrapper.like(Product::getName, keyword);
-       }
+      Page<Product> productPage = new Page<>(page, limit);
+      Page<Product> resultPage = productMapper.selectPage(productPage, queryWrapper);
 
-       Page<Product> productPage = new Page<>(page, limit);
-       Page<Product> resultPage = productMapper.selectPage(productPage, queryWrapper);
+      List<Product> products = resultPage.getRecords();
+      long total;
 
-       List<Product> products = resultPage.getRecords();
-       long total;
+      if (keyword == null || keyword.trim().isEmpty()) {
+          total = productMapper.selectCount(new LambdaQueryWrapper<>());
+      } else {
+          LambdaQueryWrapper<Product> countQueryWrapper = new LambdaQueryWrapper<>();
+          countQueryWrapper.like(Product::getName, keyword);
+          total = productMapper.selectCount(countQueryWrapper);
+      }
 
-       if (keyword == null || keyword.trim().isEmpty()) {
-           total = productMapper.selectCount(new LambdaQueryWrapper<>());
-       } else {
-           LambdaQueryWrapper<Product> countQueryWrapper = new LambdaQueryWrapper<>();
-           countQueryWrapper.like(Product::getName, keyword);
-           total = productMapper.selectCount(countQueryWrapper);
-       }
+      // 转换为 VO 列表
+      List<ProductSimpleVO> productVOList = products.stream().map(product -> {
+          ProductSimpleVO vo = new ProductSimpleVO();
+          vo.setProductId(product.getProductId());
+          vo.setName(product.getName());
+          vo.setPrice(product.getPrice());
 
-       for (Product product : products) {
-           List<String> imageUrls = imageMapper.selectList(
-                           new LambdaQueryWrapper<Image>()
-                                   .eq(Image::getProductId, product.getProductId())
-                   ).stream()
-                   .map(Image::getImagePath)
-                   .collect(Collectors.toList());//我使用的是Java8
+          // 查询图片
+          List<String> imageUrls = imageMapper.selectList(
+                          new LambdaQueryWrapper<Image>()
+                                  .eq(Image::getProductId, product.getProductId())
+                  ).stream()
+                  .map(Image::getImagePath)
+                  .toList();
 
-           product.setImageUrls(imageUrls);
-       }
+          // 设置缩略图为第一张图片
+          if (!imageUrls.isEmpty()) {
+              vo.setThumbnail(imageUrls.get(0));
+          }
 
-       Map<String, Object> response = new HashMap<>();
-       response.put("total", total);
-       response.put("results", products);
-       return response;
-   }
+          return vo;
+      }).collect(Collectors.toList());
+
+      // 构造响应
+      Map<String, Object> response = new HashMap<>();
+      response.put("total", total);
+      response.put("results", productVOList);
+      return response;
+  }
+
 
 
     /**
@@ -108,7 +118,7 @@ public class ProductServiceImpl extends ServiceImpl<ProductMapper, Product> impl
                     .collect(Collectors.toList());
 
             // 设置进 product 对象
-            product.setImageUrls(imageUrls);
+            product.setMainPictures(imageUrls);
         }
         return Optional.ofNullable(product);
     }

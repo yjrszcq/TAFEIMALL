@@ -70,5 +70,5 @@ public class Product implements Serializable {
 
     @ApiModelProperty("商品图片URL列表")
     @TableField(exist = false)
-    private List<String> imageUrls;
+    private List<String> mainPictures;
 }
