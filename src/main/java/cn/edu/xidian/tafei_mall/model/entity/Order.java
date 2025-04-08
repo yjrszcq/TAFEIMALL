@@ -23,7 +23,7 @@ import lombok.Setter;
  */
 @Getter
 @Setter
-@TableName("order")
+@TableName("t_order")
 @ApiModel(value = "Order对象", description = "订单表")
 public class Order implements Serializable {
 
@@ -37,6 +37,10 @@ public class Order implements Serializable {
     @ApiModelProperty("用户ID")
     @TableField("user_id")
     private String userId;
+
+    @ApiModelProperty("卖家ID")
+    @TableField("seller_id")
+    private String sellerId;
 
     @ApiModelProperty("总金额")
     @TableField("total_amount")

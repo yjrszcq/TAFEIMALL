@@ -1,6 +1,8 @@
 package cn.edu.xidian.tafei_mall.service;
 
 import cn.edu.xidian.tafei_mall.model.entity.User;
+import cn.edu.xidian.tafei_mall.model.vo.LoginRequestVO;
+import cn.edu.xidian.tafei_mall.model.vo.UserRegistrationVO;
 import com.baomidou.mybatisplus.extension.service.IService;
 
 /**
@@ -12,5 +14,23 @@ import com.baomidou.mybatisplus.extension.service.IService;
  * @since 2025-03-17
  */
 public interface UserService extends IService<User> {
+    /**
+     * 登录
+     */
+    String login(LoginRequestVO loginRequestVO);
 
+    /**
+     * 注册
+     */
+    User register(UserRegistrationVO userRegistrationVO);
+
+    /**
+     * 登出
+     */
+    boolean logout(String sessionId);
+
+    /**
+     * 获取用户信息
+     */
+    User getUserInfo(String sessionId);
 }
