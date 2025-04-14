@@ -1,9 +1,17 @@
 package cn.edu.xidian.tafei_mall.controller;
 
 import cn.edu.xidian.tafei_mall.model.entity.Product;
+import cn.edu.xidian.tafei_mall.model.entity.Review;
+import cn.edu.xidian.tafei_mall.model.entity.User;
 import cn.edu.xidian.tafei_mall.model.vo.*;
+import cn.edu.xidian.tafei_mall.model.vo.Response.Order.MessageResponse;
+import cn.edu.xidian.tafei_mall.model.vo.Response.Review.createReviewResponse;
+import cn.edu.xidian.tafei_mall.model.vo.Response.Review.getReviewResponse;
 import cn.edu.xidian.tafei_mall.service.ProductService;
+import cn.edu.xidian.tafei_mall.service.ReviewService;
+import cn.edu.xidian.tafei_mall.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -27,6 +35,10 @@ import java.util.Optional;
 public class ProductController {
     @Autowired
     private ProductService productService;
+    @Autowired
+    private ReviewService reviewService;
+    @Autowired
+    private UserService userService;
 
     /**
      * 商品搜索接口
@@ -54,5 +66,49 @@ public class ProductController {
         Optional<Product> product = productService.getProductById(productId);
         return product.map(ResponseEntity::ok)
                 .orElseGet(() -> ResponseEntity.notFound().build());
+    }
+
+    /**
+     * 添加商品到收藏夹
+     * @param sessionId Session ID
+     * @param productId 商品ID
+     * @return 是否成功
+     */
+    @PostMapping("/{productId}/reviews")
+    public ResponseEntity<?> addReview(@RequestHeader("Session-Id") String sessionId,
+                                       @PathVariable String productId,
+                                       @RequestBody ReviewCreateVO reviewCreateVO) {
+        try {
+            if (sessionId == null) {
+                return new ResponseEntity<>(new MessageResponse("未登录"), HttpStatus.UNAUTHORIZED);
+            }
+            User user = userService.getUserInfo(sessionId);
+            if (user == null) {
+                return new ResponseEntity<>(new MessageResponse("用户不存在"), HttpStatus.UNAUTHORIZED);
+            }
+            createReviewResponse res = reviewService.createReview(reviewCreateVO, productId, user.getUserId());
+            return new ResponseEntity<>(res, HttpStatus.OK);
+        } catch (Exception e) {
+            return new ResponseEntity<>(new MessageResponse(e.getMessage()), HttpStatus.BAD_REQUEST);
+        }
+    }
+
+    /**
+     * 获取商品的评论
+     * @param productId 商品ID
+     * @param page      页码（默认1）
+     * @param limit     每页数量（默认10）
+     * @return 商品评论
+     */
+    @GetMapping("/{productId}/reviews")
+    public ResponseEntity<?> getReviews(@PathVariable String productId,
+                                        @RequestParam(defaultValue = "1") int page,
+                                        @RequestParam(defaultValue = "10") int limit) {
+        try {
+            getReviewResponse res = reviewService.getReviewsByProductId(page, limit, productId);
+            return new ResponseEntity<>(res, HttpStatus.OK);
+        } catch (Exception e) {
+            return new ResponseEntity<>(new MessageResponse(e.getMessage()), HttpStatus.BAD_REQUEST);
+        }
     }
 }

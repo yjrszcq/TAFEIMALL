@@ -5,11 +5,7 @@ import cn.edu.xidian.tafei_mall.mapper.*;
 import cn.edu.xidian.tafei_mall.model.entity.*;
 import cn.edu.xidian.tafei_mall.model.vo.OrderCreateVO;
 import cn.edu.xidian.tafei_mall.model.vo.OrderUpdateVO;
-import cn.edu.xidian.tafei_mall.model.vo.Response.Buyer.*;
-import cn.edu.xidian.tafei_mall.model.vo.Response.Order.OrderItemResponse;
-import cn.edu.xidian.tafei_mall.model.vo.Response.Order.OrderResponse;
-import cn.edu.xidian.tafei_mall.model.vo.Response.Order.getOrderItemResponse;
-import cn.edu.xidian.tafei_mall.model.vo.Response.Order.getOrderResponse;
+import cn.edu.xidian.tafei_mall.model.vo.Response.Order.*;
 import cn.edu.xidian.tafei_mall.model.vo.Response.Seller.updateOrderResponse;
 import cn.edu.xidian.tafei_mall.service.*;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
@@ -59,6 +55,30 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
     @Override
     public Order getOrderById(String orderId){
         return orderMapper.selectById(orderId);
+    }
+
+    @Override
+    public String updateOrderStatus(String orderId, String status){
+        Order order = orderMapper.selectById(orderId);
+        if (order == null) {
+            throw new RuntimeException("Order not found");
+        }
+        switch (status) {
+            case "paid":{
+                if (!order.getStatus().equals("pending")) {
+                    throw new IllegalArgumentException("Order cannot be paid");
+                }
+                // 清空购物车
+                List<CartItem> cartItems = cartItemMapper.selectList(new QueryWrapper<CartItem>().eq("user_id", order.getUserId()));
+                for (CartItem cartItem : cartItems) {
+                    cartItemMapper.deleteById(cartItem.getCartItemId());
+                }
+                break;
+            }
+        }
+        order.setStatus(status);
+        orderMapper.updateById(order);
+        return order.getStatus();
     }
 
     /*----------------------买家视角----------------------*/
@@ -132,7 +152,7 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
             OrderItem orderItem = new OrderItem();
             orderItem.setProductId(cartItem.getProductId());
             orderItem.setQuantity(cartItem.getQuantity());
-            orderItem.setPrice(product.get().getPrice().multiply(BigDecimal.valueOf(cartItem.getQuantity())));
+            orderItem.setPrice(product.get().getCurrentPrice().multiply(BigDecimal.valueOf(cartItem.getQuantity())));
             orderItemListMap.get(sellerId).add(orderItem);
         }
         // 获取地址

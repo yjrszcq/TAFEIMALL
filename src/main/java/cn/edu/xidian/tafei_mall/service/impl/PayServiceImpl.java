@@ -19,14 +19,19 @@ public class PayServiceImpl implements PayService {
     }
 
     @Override
-    public void createPayOrder(String orderId) {
+    public void createPayOrder(String orderId, String userId) {
         //获得订单信息
         Order order = orderService.getOrderById(orderId);
-        // 这里可以调用订单服务来创建订单 TODO
+        if (order == null) {
+            throw new RuntimeException("订单不存在");
+        }
+        if (!order.getUserId().equals(userId)) {
+            throw new RuntimeException("订单不属于当前用户");
+        }
+        // 这里可以对接支付平台API完成支付 TODO
         // 监听支付状态
         if (true) {
-            order.setStatus("paid");
-            orderService.updateById(order);
+            orderService.updateOrderStatus(order.getOrderId(), "paid");
         }
     }
 }
