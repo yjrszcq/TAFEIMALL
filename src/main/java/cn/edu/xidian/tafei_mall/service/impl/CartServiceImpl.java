@@ -49,8 +49,8 @@ public class CartServiceImpl extends ServiceImpl<CartMapper, Cart> implements Ca
         for (CartItem cartItem : cartItems) {
             Product product = productService.getById(cartItem.getProductId());
             if (product != null) {
-                response.putItem(cartItem.getCartItemId() ,product.getProductId(), product.getName(), cartItem.getQuantity() ,product.getPrice().doubleValue());
-                totalPrice += product.getPrice().doubleValue() * cartItem.getQuantity();
+                response.putItem(cartItem.getCartItemId() ,product.getProductId(), product.getName(), cartItem.getQuantity() ,product.getCurrentPrice().doubleValue());
+                totalPrice += product.getCurrentPrice().doubleValue() * cartItem.getQuantity();
             }
         }
         response.setTotal(totalPrice);
