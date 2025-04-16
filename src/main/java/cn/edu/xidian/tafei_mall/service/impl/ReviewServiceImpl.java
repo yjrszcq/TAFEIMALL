@@ -20,6 +20,7 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.UUID;
 
 @Service
@@ -39,6 +40,9 @@ public class ReviewServiceImpl extends ServiceImpl<ReviewMapper, Review> impleme
         }
         if (!order.getUserId().equals(userId)) {
             throw new IllegalArgumentException("Order does not belong to current user");
+        }
+        if (!Objects.equals(order.getStatus(), "finished")) {
+            throw new RuntimeException("Order must be finished");
         }
         List<OrderItem> orderItems = orderItemMapper.selectList(new LambdaQueryWrapper<OrderItem>().eq(OrderItem::getOrderId, order.getOrderId()));
         if (orderItems == null || orderItems.isEmpty()) {

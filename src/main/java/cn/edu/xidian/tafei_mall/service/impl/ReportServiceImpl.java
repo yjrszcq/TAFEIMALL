@@ -1,22 +1,21 @@
 package cn.edu.xidian.tafei_mall.service.impl;
 
-import cn.edu.xidian.tafei_mall.mapper.OrderItemMapper;
-import cn.edu.xidian.tafei_mall.mapper.OrderMapper;
-import cn.edu.xidian.tafei_mall.mapper.ProductMapper;
-import cn.edu.xidian.tafei_mall.mapper.ReviewMapper;
-import cn.edu.xidian.tafei_mall.model.entity.Order;
-import cn.edu.xidian.tafei_mall.model.entity.OrderItem;
-import cn.edu.xidian.tafei_mall.model.entity.Product;
-import cn.edu.xidian.tafei_mall.model.entity.Review;
+import cn.edu.xidian.tafei_mall.mapper.*;
+import cn.edu.xidian.tafei_mall.model.entity.*;
 import cn.edu.xidian.tafei_mall.model.vo.Response.Report.DetailResponse;
 import cn.edu.xidian.tafei_mall.model.vo.Response.Report.SummaryResponse;
 import cn.edu.xidian.tafei_mall.model.vo.Response.Report.TopProductResponse;
 import cn.edu.xidian.tafei_mall.model.vo.Response.Report.createReportResponse;
+import cn.edu.xidian.tafei_mall.service.ProductService;
 import cn.edu.xidian.tafei_mall.service.ReportService;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.sql.Time;
+import java.time.LocalDateTime;
+import java.time.YearMonth;
 import java.util.*;
 
 @Service
@@ -29,6 +28,10 @@ public class ReportServiceImpl implements ReportService {
     private ReviewMapper reviewMapper;
     @Autowired
     private ProductMapper productMapper;
+    @Autowired
+    PromotionProductMapper promotionProductMapper;
+    @Autowired
+    PromotionMapper promotionMapper;
 
     @Override
     public createReportResponse createMonthlyReport(int year, int month, boolean detail, String userId){
@@ -95,10 +98,40 @@ public class ReportServiceImpl implements ReportService {
             if (detail) {
                 Product product = productMapper.selectById(productId);
                 if (product != null) {
+                    // 获取本月订单创建时间
+                    List<LocalDateTime> createTimes = new ArrayList<>();
+                    for (OrderItem orderItem : orderItems) {
+                        createTimes.add(orderItem.getCreatedAt());
+                    }
+                    // 处理促销ID
+                    List<String> promotionIds = new ArrayList<>();
+                    List<PromotionProduct> promotionProducts = promotionProductMapper.selectList(new LambdaQueryWrapper<PromotionProduct>().eq(PromotionProduct::getProductId, productId));
+                    // 遍历促销活动
+                    for (PromotionProduct promotionProduct : promotionProducts) {
+                        String promotionId = promotionProduct.getPromotionId();
+                        Promotion promotion = promotionMapper.selectById(promotionId);
+                        if (promotion != null) {
+                            // 检查促销活动的开始和结束时间，保证在本月内有效过
+                            if (promotion.getStartDate().isBefore(LocalDateTime.of(year, month, YearMonth.of(year, month).lengthOfMonth(), 23, 59))
+                                    && promotion.getEndDate().isAfter(LocalDateTime.of(year, month, 1, 0, 0))) {
+                                // 如果有某个订单项的创建时间在促销活动的开始和结束时间之间，则添加该促销ID
+                                for (LocalDateTime createTime : createTimes) {
+                                    if (createTime.isAfter(promotion.getStartDate()) && createTime.isBefore(promotion.getEndDate())) {
+                                        promotionIds.add(promotionId);
+                                        break; // 找到一个符合条件的促销活动就可以了
+                                    }
+                                }
+                            }
+                        }
+                    }
                     String productName = product.getName();
-                    String promotionId = null;
-                    // 此处处理促销ID
-                    detailResponses.add(new DetailResponse(productId, productName, productSalesCount, productTotalRevenue, (float)averageRating, promotionId));
+                    if (!promotionIds.isEmpty()) {
+                        // 根据沟通，目前一个月最多只能有一个活动参与，因此仅返回一个活动
+                        detailResponses.add(new DetailResponse(productId, productName, productSalesCount, productTotalRevenue, (float)averageRating, promotionIds.get(0)));
+                    } else {
+                        detailResponses.add(new DetailResponse(productId, productName, productSalesCount, productTotalRevenue, (float)averageRating, null));
+                    }
+
                 }
             }
         }
