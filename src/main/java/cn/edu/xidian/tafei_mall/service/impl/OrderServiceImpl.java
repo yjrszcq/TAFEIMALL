@@ -37,6 +37,8 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
     @Autowired
     private ProductService productService;
     @Autowired
+    private ProductMapper productMapper;
+    @Autowired
     private CartMapper cartMapper;
     @Autowired
     private CartItemMapper cartItemMapper;
@@ -68,10 +70,26 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
                 if (!order.getStatus().equals("pending")) {
                     throw new IllegalArgumentException("Order cannot be paid");
                 }
-                // 清空购物车
                 List<CartItem> cartItems = cartItemMapper.selectList(new QueryWrapper<CartItem>().eq("user_id", order.getUserId()));
+                Map<CartItem, Product> products = new HashMap<>();
+                // 验证购物车商品是否存在，库存是否足够
                 for (CartItem cartItem : cartItems) {
-                    cartItemMapper.deleteById(cartItem.getCartItemId());
+                    Optional<Product> product = productService.getProductById(cartItem.getProductId());
+                    if (product.isEmpty()) {
+                        throw new IllegalArgumentException("Invalid product ID");
+                    }
+                    if (cartItem.getQuantity() > product.get().getStock()) {
+                        throw new IllegalArgumentException("Insufficient stock");
+                    }
+                    products.put(cartItem, product.get());
+                }
+                // 清空购物车，商品库存减少
+                for (Map.Entry<CartItem, Product> entry : products.entrySet()) {
+                    Product product = entry.getValue();
+                    product.setStock(product.getStock() - entry.getKey().getQuantity());
+                    product.setUpdatedAt(LocalDateTime.now());
+                    productMapper.updateById(product);
+                    cartItemMapper.deleteById(entry.getKey().getCartId());
                 }
                 break;
             }
