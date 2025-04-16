@@ -152,7 +152,7 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
             OrderItem orderItem = new OrderItem();
             orderItem.setProductId(cartItem.getProductId());
             orderItem.setQuantity(cartItem.getQuantity());
-            orderItem.setPrice(product.get().getCurrentPrice().multiply(BigDecimal.valueOf(cartItem.getQuantity())));
+            orderItem.setPrice(productService.currentPrice(product.get().getProductId()).multiply(BigDecimal.valueOf(cartItem.getQuantity())));
             orderItemListMap.get(sellerId).add(orderItem);
         }
         // 获取地址
