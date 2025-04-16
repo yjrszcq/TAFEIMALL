@@ -12,7 +12,6 @@ public class PayServiceImpl implements PayService {
     @Autowired
     private OrderService orderService;
 
-
     @Override
     public boolean queryOrderStatus(String orderId) {
         return "paid".equals(orderService.getOrderById(orderId).getStatus());
