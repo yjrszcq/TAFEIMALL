@@ -80,8 +80,7 @@ public class PayServiceImpl implements PayService {
         scheduler.schedule(() -> {
             // 模拟支付成功
             record.setPaid(true);
-            order.setStatus("paid");
-            orderService.updateById(order);
+            orderService.updateOrderStatus("paid", orderId);
 
             // 模拟异步通知
             sendPaymentNotification(orderId);
