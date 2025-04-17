@@ -1,6 +1,7 @@
 package cn.edu.xidian.tafei_mall.service.impl;
 
 import cn.edu.xidian.tafei_mall.mapper.FavoriteMapper;
+
 import cn.edu.xidian.tafei_mall.model.entity.Favorite;
 import cn.edu.xidian.tafei_mall.model.entity.Product;
 import cn.edu.xidian.tafei_mall.model.entity.User;
@@ -10,13 +11,17 @@ import cn.edu.xidian.tafei_mall.service.FavoriteService;
 import cn.edu.xidian.tafei_mall.service.ImageService;
 import cn.edu.xidian.tafei_mall.service.ProductService;
 import cn.edu.xidian.tafei_mall.service.UserService;
+
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -30,6 +35,7 @@ import java.util.UUID;
  * @since 2025-03-17
  */
 @Service
+@ConditionalOnProperty(name = "features.favorite.enabled", havingValue = "true", matchIfMissing = true)
 public class FavoriteServiceImpl extends ServiceImpl<FavoriteMapper, Favorite> implements FavoriteService {
 
     @Autowired
@@ -122,7 +128,7 @@ public class FavoriteServiceImpl extends ServiceImpl<FavoriteMapper, Favorite> i
                 response.addFavorite(
                         product.getProductId(),
                         product.getName(),
-                        product.getPrice().doubleValue(),
+                        productService.currentPrice(product.getProductId()).doubleValue(),
                         thumbnail);
             }
         }
@@ -130,3 +136,4 @@ public class FavoriteServiceImpl extends ServiceImpl<FavoriteMapper, Favorite> i
         return response;
     }
 }
+

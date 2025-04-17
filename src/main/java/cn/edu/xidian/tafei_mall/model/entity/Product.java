@@ -26,7 +26,6 @@ import lombok.Setter;
 @TableName("product")
 @ApiModel(value = "Product对象", description = "商品表")
 public class Product implements Serializable {
-
     @Serial
     private static final long serialVersionUID = 1L;
 
@@ -42,13 +41,21 @@ public class Product implements Serializable {
     @TableField("description")
     private String description;
 
-    @ApiModelProperty("价格")
+    @ApiModelProperty("基准价格")
     @TableField("price")
     private BigDecimal price;
 
-    @ApiModelProperty("库存")
+    @ApiModelProperty("当前售价")
+    @TableField("current_price")
+    private BigDecimal currentPrice;
+
+    @ApiModelProperty("库存数量")
     @TableField("stock")
     private Integer stock;
+
+    @ApiModelProperty("是否促销")
+    @TableField("is_on_promotion")
+    private Boolean isOnPromotion;
 
     @ApiModelProperty("是否包邮")
     @TableField("is_free_shipping")
