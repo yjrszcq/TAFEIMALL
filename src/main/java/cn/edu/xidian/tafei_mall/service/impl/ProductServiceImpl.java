@@ -183,7 +183,7 @@ public class ProductServiceImpl extends ServiceImpl<ProductMapper, Product> impl
                     // 促销活动有效
                     if (promotion.getIsActive() && promotion.getStartDate().isBefore(LocalDateTime.now()) && promotion.getEndDate().isAfter(LocalDateTime.now())) {
                         // 计算折扣价格
-                        return product.getPrice().multiply(promotionProduct.getDiscountRate().multiply(BigDecimal.valueOf(0.01)));
+                        return product.getPrice().multiply(BigDecimal.valueOf(100).subtract(promotionProduct.getDiscountRate()).multiply(BigDecimal.valueOf(0.01)));
                     }
                 }
             }
