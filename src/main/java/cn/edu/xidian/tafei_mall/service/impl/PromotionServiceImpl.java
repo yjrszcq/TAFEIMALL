@@ -129,7 +129,7 @@ public class PromotionServiceImpl extends ServiceImpl<PromotionMapper, Promotion
             }
             return new createPromotionResponse(promotion.getPromotionId());
         } catch (DateTimeParseException e) {
-            throw new IllegalArgumentException("日期格式不正确，应为YYYY-MM-DD HH:mm");
+            throw new IllegalArgumentException("日期格式不正确，应为YYYY-MM-DD hh:mm");
         }
     }
 
