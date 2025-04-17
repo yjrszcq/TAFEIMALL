@@ -199,14 +199,15 @@ create table t_promotion_products
 
 create table t_user_favorites
 (
-    user_id    varchar(36)                         not null,
-    product_id varchar(36)                         not null,
-    created_at timestamp default CURRENT_TIMESTAMP null,
-    update_at  timestamp default CURRENT_TIMESTAMP null on update CURRENT_TIMESTAMP,
-    primary key (user_id, product_id),
-    constraint fk_product_id
-        foreign key (product_id) references product (product_id),
-    constraint fk_user_id
-        foreign key (user_id) references user (user_id)
+    favorite_id varchar(36)                        not null comment '收藏ID'
+        primary key,
+    user_id     varchar(36)                        not null comment '用户ID',
+    product_id  varchar(36)                        not null comment '商品ID',
+    created_at  datetime default CURRENT_TIMESTAMP not null comment '创建时间',
+    updated_at  datetime default CURRENT_TIMESTAMP not null on update CURRENT_TIMESTAMP comment '更新时间',
+    constraint fk_favorite_user
+        foreign key (user_id) references user (user_id),
+    constraint fk_favorite_product
+        foreign key (product_id) references product (product_id)
 );
 

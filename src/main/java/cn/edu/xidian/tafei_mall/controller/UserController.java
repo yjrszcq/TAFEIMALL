@@ -78,16 +78,17 @@ public class UserController {
     /**
      * 添加收藏
      * 
-     * @param favoriteAddVO 收藏信息
+     * @param productId     商品ID
      * @param sessionId     会话ID
      * @return 处理结果
      */
-    @PostMapping("/favorites")
-    public ResponseEntity<?> addFavorite(@RequestBody FavoriteAddVO favoriteAddVO,
-            @RequestHeader("Session-Id") String sessionId) {
+    @PostMapping("/favorites/{productId}")
+    public ResponseEntity<?> addFavorite(@RequestHeader("Session-Id") String sessionId, @PathVariable String productId) {
+        FavoriteAddVO favoriteAddVO = new FavoriteAddVO();
+        favoriteAddVO.setProductId(productId);
         try {
             favoriteService.addFavorite(favoriteAddVO, sessionId);
-            return new ResponseEntity<>(new FavoriteResponse("收藏成功"), HttpStatus.OK);
+            return new ResponseEntity<>(new FavoriteResponse("收藏成功"), HttpStatus.CREATED);
         } catch (Exception e) {
             return new ResponseEntity<>(new FavoriteResponse(e.getMessage()), HttpStatus.BAD_REQUEST);
         }
@@ -96,13 +97,14 @@ public class UserController {
     /**
      * 删除收藏
      * 
-     * @param favoriteAddVO 收藏信息
+     * @param productId     商品ID
      * @param sessionId     会话ID
      * @return 处理结果
      */
-    @DeleteMapping("/favorites")
-    public ResponseEntity<?> removeFavorite(@RequestBody FavoriteAddVO favoriteAddVO,
-            @RequestHeader("Session-Id") String sessionId) {
+    @DeleteMapping("/favorites/{productId}")
+    public ResponseEntity<?> removeFavorite(@RequestHeader("Session-Id") String sessionId, @PathVariable String productId) {
+        FavoriteAddVO favoriteAddVO = new FavoriteAddVO();
+        favoriteAddVO.setProductId(productId);
         try {
             favoriteService.removeFavorite(favoriteAddVO, sessionId);
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);

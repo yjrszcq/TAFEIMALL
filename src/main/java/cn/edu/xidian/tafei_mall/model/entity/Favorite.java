@@ -22,7 +22,7 @@ import lombok.Setter;
  */
 @Getter
 @Setter
-@TableName("favorite")
+@TableName("t_user_favorites")
 @ApiModel(value = "Favorite对象", description = "收藏表")
 public class Favorite implements Serializable {
 
