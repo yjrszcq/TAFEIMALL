@@ -32,7 +32,7 @@ import org.springframework.web.bind.annotation.*;
 public class UserController {
     @Autowired
     private AddressService addressService;
-    @Autowired
+    @Autowired(required = false)
     private FavoriteService favoriteService;
     @Autowired
     private UserService userService;
@@ -82,6 +82,7 @@ public class UserController {
                                           @RequestParam(defaultValue = "10") int limit,
                                           @RequestHeader("Session-Id") String sessionId){
         try{
+
             if (sessionId == null) {
                 return new ResponseEntity<>(new MessageResponse("未登录"), HttpStatus.UNAUTHORIZED);
             }
@@ -99,6 +100,10 @@ public class UserController {
     @DeleteMapping("/favorites/{productId}")
     public ResponseEntity<?> deleteFavorite(@RequestHeader("Session-Id") String sessionId, @PathVariable String productId){
         try{
+
+            if (favoriteService == null) {
+                return new ResponseEntity<>(new MessageResponse("收藏功能未启用"),HttpStatus.UNAUTHORIZED);
+            }
             if (sessionId == null) {
                 return new ResponseEntity<>(new MessageResponse("未登录"), HttpStatus.UNAUTHORIZED);
             }
@@ -119,6 +124,10 @@ public class UserController {
     @PostMapping("/favorites/{productId}")
     public ResponseEntity<?> addFavorite(@RequestHeader("Session-Id") String sessionId, @PathVariable String productId){
         try{
+
+            if (favoriteService == null) {
+                return new ResponseEntity<>(new MessageResponse("收藏功能未启用"),HttpStatus.UNAUTHORIZED);
+            }
             if (sessionId == null) {
                 return new ResponseEntity<>(new MessageResponse("未登录"), HttpStatus.UNAUTHORIZED);
             }

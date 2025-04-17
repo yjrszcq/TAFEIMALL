@@ -21,11 +21,11 @@ public class PromotionProduct implements Serializable {
     private static final long serialVersionUID = 1L;
 
     @ApiModelProperty("促销活动ID")
-    @TableId("promotion_id")
+    @TableField("promotion_id")
     private String promotionId;
 
     @ApiModelProperty("商品ID")
-    @TableId("product_id")
+    @TableField("product_id")
     private String productId;
 
     @ApiModelProperty("折扣率(0.00-1.00)")

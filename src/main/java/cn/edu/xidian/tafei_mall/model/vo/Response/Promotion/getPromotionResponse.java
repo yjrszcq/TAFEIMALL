@@ -11,7 +11,7 @@ import java.time.LocalDateTime;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class getPromotionResponse{
     private final String promotionId;
-    private final Double discountRate;
+    private final BigDecimal discountRate;
     private final BigDecimal basePrice;
     private final BigDecimal currentPrice;
 
@@ -19,7 +19,7 @@ public class getPromotionResponse{
     private final LocalDateTime validUntil;
 
     public getPromotionResponse(String promotionId,
-                                Double discountRate,
+                                BigDecimal discountRate,
                                 BigDecimal basePrice,
                                 BigDecimal currentPrice,
                                 LocalDateTime validUntil) {
