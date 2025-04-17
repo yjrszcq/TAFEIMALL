@@ -29,7 +29,7 @@ import org.springframework.web.bind.annotation.*;
 public class UserController {
     @Autowired
     private AddressService addressService;
-    @Autowired
+    @Autowired(required = false)
     private FavoriteService favoriteService;
 
     @PostMapping("/address")
@@ -74,6 +74,7 @@ public class UserController {
             return new ResponseEntity<>(new AddressResponse("地址删除失败"), HttpStatus.BAD_REQUEST);
         }
     }
+
     /**
      * 添加收藏
      * 

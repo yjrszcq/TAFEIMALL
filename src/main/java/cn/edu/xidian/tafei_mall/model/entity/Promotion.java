@@ -23,7 +23,15 @@ public class Promotion implements Serializable {
     @ApiModelProperty("促销活动ID")
     @TableId("promotion_id")
     private String promotionId;
+/*
+    @ApiModelProperty("商品ID")
+    @TableId("product_id")
+    private String productId;
 
+    @ApiModelProperty("促销折扣率")
+    @TableId("discount_rate")
+    private String discountRate;
+*/
     @ApiModelProperty("活动开始时间")
     @TableField("start_date")
     private LocalDateTime startDate;

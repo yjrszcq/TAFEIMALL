@@ -5,9 +5,11 @@ import cn.edu.xidian.tafei_mall.model.entity.Review;
 import cn.edu.xidian.tafei_mall.model.entity.User;
 import cn.edu.xidian.tafei_mall.model.vo.*;
 import cn.edu.xidian.tafei_mall.model.vo.Response.Order.MessageResponse;
+import cn.edu.xidian.tafei_mall.model.vo.Response.Promotion.getPromotionResponse;
 import cn.edu.xidian.tafei_mall.model.vo.Response.Review.createReviewResponse;
 import cn.edu.xidian.tafei_mall.model.vo.Response.Review.getReviewResponse;
 import cn.edu.xidian.tafei_mall.service.ProductService;
+import cn.edu.xidian.tafei_mall.service.PromotionService;
 import cn.edu.xidian.tafei_mall.service.ReviewService;
 import cn.edu.xidian.tafei_mall.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -39,7 +41,8 @@ public class ProductController {
     private ReviewService reviewService;
     @Autowired
     private UserService userService;
-
+    @Autowired
+    private PromotionService promotionService;
     /**
      * 商品搜索接口
      * @param keyword  搜索关键字（为空时返回所有商品）
@@ -107,6 +110,16 @@ public class ProductController {
         try {
             getReviewResponse res = reviewService.getReviewsByProductId(page, limit, productId);
             return new ResponseEntity<>(res, HttpStatus.OK);
+        } catch (Exception e) {
+            return new ResponseEntity<>(new MessageResponse(e.getMessage()), HttpStatus.BAD_REQUEST);
+        }
+    }
+
+    @GetMapping("/{productId}/promotion")
+    public ResponseEntity<?> getPromotion(@PathVariable String productId){
+        try {
+            getPromotionResponse response = promotionService.getPromotionById(productId);
+            return new ResponseEntity<>(response, HttpStatus.OK);
         } catch (Exception e) {
             return new ResponseEntity<>(new MessageResponse(e.getMessage()), HttpStatus.BAD_REQUEST);
         }
