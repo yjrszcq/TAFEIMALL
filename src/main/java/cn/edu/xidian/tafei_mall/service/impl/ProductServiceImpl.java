@@ -11,6 +11,7 @@ import cn.edu.xidian.tafei_mall.model.vo.Response.Seller.getProductResponse;
 import cn.edu.xidian.tafei_mall.service.ProductService;
 import cn.hutool.core.bean.BeanUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -173,7 +174,7 @@ public class ProductServiceImpl extends ServiceImpl<ProductMapper, Product> impl
             return BigDecimal.ZERO;
         }
 
-        List<PromotionProduct> promotionProducts = promotionProductMapper.selectList(new LambdaQueryWrapper<PromotionProduct>().eq(PromotionProduct::getProductId, productId));
+        List<PromotionProduct> promotionProducts = promotionProductMapper.selectList(new QueryWrapper<PromotionProduct>().eq("product_id", productId));
         if (promotionProducts != null && !promotionProducts.isEmpty()) {
             // 如果有促销活动，返回促销价格
             for (PromotionProduct promotionProduct : promotionProducts) {

@@ -51,7 +51,7 @@ public class PromotionServiceImpl extends ServiceImpl<PromotionMapper, Promotion
                 throw new IllegalArgumentException("促销信息不能为空");
             }
 
-            List<String> productIds = promotionCreateVO.getProductIds();
+            List<String> productIds = promotionCreateVO.getProductId();
             if (CollectionUtils.isEmpty(productIds)) {
                 throw new IllegalArgumentException("必须至少选择一个商品");
             }

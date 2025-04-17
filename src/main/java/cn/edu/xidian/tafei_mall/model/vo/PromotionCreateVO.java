@@ -9,7 +9,7 @@ import java.util.List;
 @Getter
 @Data
 public class PromotionCreateVO {
-    private List<String> productIds;
+    private List<String> productId;
     private BigDecimal discountRate;
     private String startDate;
     private String endDate;

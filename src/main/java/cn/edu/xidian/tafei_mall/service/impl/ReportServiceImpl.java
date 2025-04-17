@@ -37,8 +37,8 @@ public class ReportServiceImpl implements ReportService {
     public createReportResponse createMonthlyReport(int year, int month, boolean detail, String userId){
         List<Order> orders = orderMapper.selectList(new QueryWrapper<Order>()
                 .eq("seller_id", userId)
-                .apply("YEAR(create_at) = {0}", year)
-                .apply("MONTH(create_at) = {0}", month));
+                .apply("YEAR(created_at) = {0}", year)
+                .apply("MONTH(created_at) = {0}", month));
 
         if (orders == null || orders.isEmpty()) {
             throw new RuntimeException("No orders found for the specified period");
