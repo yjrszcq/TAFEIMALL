@@ -8,7 +8,7 @@ import java.util.List;
 @Getter
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class createPromotionResponse {
-    private String promotionId;
+    private final String promotionId;
 
     public createPromotionResponse(String promotionId) {
         this.promotionId = promotionId;

@@ -34,7 +34,7 @@ public class ReviewServiceImpl extends ServiceImpl<ReviewMapper, Review> impleme
 
     @Override
     public createReviewResponse createReview(ReviewCreateVO reviewCreateVO, String productId, String userId) {
-        Order order = orderMapper.selectById(Long.parseLong(reviewCreateVO.getOrderId()));
+        Order order = orderMapper.selectById(reviewCreateVO.getOrderId());
         if (order == null) {
             throw new RuntimeException("Order not found");
         }

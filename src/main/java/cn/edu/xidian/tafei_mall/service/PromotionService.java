@@ -6,10 +6,7 @@ import cn.edu.xidian.tafei_mall.model.vo.Response.Promotion.createPromotionRespo
 import cn.edu.xidian.tafei_mall.model.vo.Response.Promotion.getPromotionResponse;
 
 public interface PromotionService {
-    createPromotionResponse createPromotion(PromotionCreateVO promotionCreateVO);
+    createPromotionResponse createPromotion(PromotionCreateVO promotionCreateVO, String userId);
     getPromotionResponse getPromotionById(String productId);
-
     PromotionListResponse getActivePromotions(int page, int limit);
-    // List<Promotion> getAllPromotions();
-    // boolean deletePromotionById(String id);
 }

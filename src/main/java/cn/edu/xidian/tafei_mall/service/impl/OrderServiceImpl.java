@@ -70,7 +70,8 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
                 if (!order.getStatus().equals("pending")) {
                     throw new IllegalArgumentException("Order cannot be paid");
                 }
-                List<CartItem> cartItems = cartItemMapper.selectList(new QueryWrapper<CartItem>().eq("user_id", order.getUserId()));
+                Cart cart = cartMapper.selectOne(new QueryWrapper<Cart>().eq("user_id", order.getUserId()));
+                List<CartItem> cartItems = cartItemMapper.selectList(new QueryWrapper<CartItem>().eq("cart_id", cart.getCartId()));
                 Map<CartItem, Product> products = new HashMap<>();
                 // 验证购物车商品是否存在，库存是否足够
                 for (CartItem cartItem : cartItems) {
@@ -89,7 +90,7 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
                     product.setStock(product.getStock() - entry.getKey().getQuantity());
                     product.setUpdatedAt(LocalDateTime.now());
                     productMapper.updateById(product);
-                    cartItemMapper.deleteById(entry.getKey().getCartId());
+                    cartItemMapper.deleteById(entry.getKey().getCartItemId());
                 }
                 break;
             }

@@ -179,7 +179,7 @@ public class SellerController {
             if (user == null) {
                 return new ResponseEntity<>(new MessageResponse("用户不存在"), HttpStatus.UNAUTHORIZED);
             }
-            createPromotionResponse response = promotionService.createPromotion(promotionCreateVO);
+            createPromotionResponse response = promotionService.createPromotion(promotionCreateVO, user.getUserId());
             return ResponseEntity.ok().body(response);
         } catch (Exception e) {
             return new ResponseEntity<>(new MessageResponse(e.getMessage()), HttpStatus.BAD_REQUEST);

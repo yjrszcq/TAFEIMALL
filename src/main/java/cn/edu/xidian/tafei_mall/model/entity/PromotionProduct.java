@@ -30,7 +30,7 @@ public class PromotionProduct implements Serializable {
     @TableField("product_id")
     private String productId;
 
-    @ApiModelProperty("折扣率(0.00-1.00)")
+    @ApiModelProperty("折扣率(1~100)")
     @TableField("discount_rate")
     private BigDecimal discountRate;
 }

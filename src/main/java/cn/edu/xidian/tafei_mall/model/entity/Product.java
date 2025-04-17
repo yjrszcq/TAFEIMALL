@@ -42,8 +42,8 @@ public class Product implements Serializable {
     private String description;
 
     @ApiModelProperty("基准价格")
-    @TableField("base_price")
-    private BigDecimal basePrice;
+    @TableField("price")
+    private BigDecimal price;
 
     @ApiModelProperty("当前售价")
     @TableField("current_price")

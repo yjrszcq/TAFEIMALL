@@ -43,20 +43,13 @@ public class PayServiceImpl implements PayService {
     }
 
     @Override
-    public void createPayOrder(String orderId, String sessionId) {
-        if (sessionId == null) {
-            throw new RuntimeException("未登录");
-        }
-        User user = userService.getUserInfo(sessionId);
-        if (user == null) {
-            throw new RuntimeException("用户不存在");
-        }
+    public void createPayOrder(String orderId, String userId) {
         //获得订单信息
         Order order = orderService.getOrderById(orderId);
         if (order == null) {
             throw new RuntimeException("订单不存在");
         }
-        if (!order.getUserId().equals(user.getUserId())) {
+        if (!order.getUserId().equals(userId)) {
             throw new RuntimeException("无权限操作该订单");
         }
         // 如果已支付则直接返回
@@ -80,7 +73,7 @@ public class PayServiceImpl implements PayService {
         scheduler.schedule(() -> {
             // 模拟支付成功
             record.setPaid(true);
-            orderService.updateOrderStatus("paid", orderId);
+            orderService.updateOrderStatus(orderId, "paid");
 
             // 模拟异步通知
             sendPaymentNotification(orderId);

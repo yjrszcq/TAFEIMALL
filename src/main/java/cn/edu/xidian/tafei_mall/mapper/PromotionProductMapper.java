@@ -2,20 +2,26 @@ package cn.edu.xidian.tafei_mall.mapper;
 
 import cn.edu.xidian.tafei_mall.model.entity.PromotionProduct;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import org.apache.ibatis.annotations.*;
 
-import java.util.List;
+import java.time.LocalDateTime;
 
 @Mapper
 public interface PromotionProductMapper extends BaseMapper<PromotionProduct> {
-    @Results(id = "promotionProductMap", value = {
-            @Result(column = "promotion_id", property = "promotionId"),
-            @Result(column = "product_id", property = "productId", id = true), // 标记为ID
-            @Result(column = "discount_rate", property = "discountRate")
-    })
-    @Select("SELECT * FROM t_promotion_products WHERE promotion_id = #{promotionId}")
-    List<PromotionProduct> selectByPromotionId(String promotionId);
-
-    @Select("SELECT * FROM t_promotion_products WHERE product_id = #{productId}")
-    PromotionProduct selectByProductId(@Param("productId") String productId);
+    @Select(
+            "SELECT pp.* FROM t_promotion_products pp " +
+                    "INNER JOIN t_promotions p ON pp.promotion_id = p.promotion_id " +
+                    "INNER JOIN product pr ON pp.product_id = pr.product_id " +
+                    "WHERE p.is_active = 1 " +
+                    "AND p.start_date <= #{now} " +
+                    "AND p.end_date >= #{now} " +
+                    "AND pr.stock > 0 " +
+                    "ORDER BY p.start_date DESC"
+    )
+    IPage<PromotionProduct> selectActivePromotionsWithStock(
+            Page<PromotionProduct> page,
+            @Param("now") LocalDateTime now
+    );
 }
