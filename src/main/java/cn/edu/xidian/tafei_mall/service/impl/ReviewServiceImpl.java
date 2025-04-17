@@ -62,7 +62,16 @@ public class ReviewServiceImpl extends ServiceImpl<ReviewMapper, Review> impleme
                             .eq(Review::getOrderId, order.getOrderId());
                 Long count = reviewMapper.selectCount(queryWrapper);
                 if (count > 0) {
-                    throw new RuntimeException("You have already reviewed this product");
+                    // throw new RuntimeException("You have already reviewed this product");
+                    if (count > 1) {
+                        throw new RuntimeException("You have already reviewed this product");
+                    }
+                    Review review = reviewMapper.selectOne(queryWrapper);
+                    review.setRating(reviewCreateVO.getRating());
+                    review.setComment(reviewCreateVO.getComment());
+                    review.setUpdatedAt(LocalDateTime.now());
+                    reviewMapper.updateById(review);
+                    return new createReviewResponse(review.getReviewId(), "修改成功");
                 }
                 // 创建评价
                 Review review = new Review();
