@@ -16,7 +16,7 @@ public class getProductResponse {
 
     public getProductResponse(List<cn.edu.xidian.tafei_mall.model.entity.Product> products) {
         for (cn.edu.xidian.tafei_mall.model.entity.Product product : products) {
-            this.products.add(new Product(product.getProductId(), product.getName(), product.getDescription(), product.getCurrentPrice(), product.getStock(), product.getIsFreeShipping()));
+            this.products.add(new Product(product.getProductId(), product.getName(), product.getDescription(), product.getBasePrice(), product.getStock(), product.getIsFreeShipping()));
         }
     }
 }

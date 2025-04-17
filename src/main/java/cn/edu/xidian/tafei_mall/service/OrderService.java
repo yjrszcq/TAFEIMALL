@@ -24,11 +24,12 @@ public interface OrderService extends IService<Order> {
     getOrderResponse getOrderByCustomer(String userId);
     getOrderResponse getOrderByCustomer(String OrderId, String userId);
     createOrderResponse createOrder(String cartId, OrderCreateVO orderCreateVO, String userId);
+    boolean confirmOrder(String orderId, String userId);
     boolean cancelOrder(String orderId, String userId);
     // 卖家
     getOrderResponse getOrderBySeller(String userId);
     getOrderResponse getOrderBySeller(String orderId, String userId);
     updateOrderResponse updateOrderBySeller(String orderId, OrderUpdateVO orderUpdateV, String userId);
 
-    boolean confirmOrder(String orderId, String userId);
+
 }
