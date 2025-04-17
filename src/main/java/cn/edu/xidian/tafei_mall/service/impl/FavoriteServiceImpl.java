@@ -1,15 +1,17 @@
 package cn.edu.xidian.tafei_mall.service.impl;
 
 import cn.edu.xidian.tafei_mall.mapper.FavoriteMapper;
-import cn.edu.xidian.tafei_mall.mapper.ImageMapper;
-import cn.edu.xidian.tafei_mall.mapper.ProductMapper;
+
 import cn.edu.xidian.tafei_mall.model.entity.Favorite;
-import cn.edu.xidian.tafei_mall.model.entity.Image;
 import cn.edu.xidian.tafei_mall.model.entity.Product;
-import cn.edu.xidian.tafei_mall.model.vo.Response.Favorite.FavoriteResponse;
-import cn.edu.xidian.tafei_mall.model.vo.Response.Favorite.getFavoriteResponse;
+import cn.edu.xidian.tafei_mall.model.entity.User;
+import cn.edu.xidian.tafei_mall.model.vo.FavoriteAddVO;
+import cn.edu.xidian.tafei_mall.model.vo.Response.Favorite.getFavoritesResponse;
 import cn.edu.xidian.tafei_mall.service.FavoriteService;
-import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import cn.edu.xidian.tafei_mall.service.ImageService;
+import cn.edu.xidian.tafei_mall.service.ProductService;
+import cn.edu.xidian.tafei_mall.service.UserService;
+
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
@@ -17,61 +19,118 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
 
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
+
+/**
+ * <p>
+ * 收藏表 服务实现类
+ * </p>
+ *
+ * @author shenyaoguan
+ * @since 2025-03-17
+ */
 @Service
 public class FavoriteServiceImpl extends ServiceImpl<FavoriteMapper, Favorite> implements FavoriteService {
+
     @Autowired
     private FavoriteMapper favoriteMapper;
+
     @Autowired
-    private ProductMapper productMapper;
+    private UserService userService;
+
     @Autowired
-    private ImageMapper imageMapper;
+    private ProductService productService;
 
     @Override
-    public boolean addFavorite(String productId, String userId){
+    public void addFavorite(FavoriteAddVO favoriteAddVO, String sessionId) {
+        User user = userService.getUserInfo(sessionId);
+        if (user == null) {
+            throw new RuntimeException("用户未登录");
+        }
+
+        // 检查商品是否存在
+        Optional<Product> productOpt = productService.getProductById(favoriteAddVO.getProductId());
+        if (productOpt.isEmpty()) {
+            throw new RuntimeException("商品不存在");
+        }
+
+        // 检查是否已经收藏过
+        QueryWrapper<Favorite> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq("user_id", user.getUserId())
+                .eq("product_id", favoriteAddVO.getProductId());
+        Favorite existingFavorite = favoriteMapper.selectOne(queryWrapper);
+
+        if (existingFavorite != null) {
+            throw new RuntimeException("已经收藏过该商品");
+        }
+
+        // 添加收藏
         Favorite favorite = new Favorite();
-        favorite.setProductId(productId);
-        favorite.setUserId(userId);
+        favorite.setFavoriteId(String.valueOf(UUID.randomUUID()));
+        favorite.setUserId(user.getUserId());
+        favorite.setProductId(favoriteAddVO.getProductId());
         favorite.setCreatedAt(LocalDateTime.now());
-        return favoriteMapper.insert(favorite) > 0;
+        favorite.setUpdatedAt(LocalDateTime.now());
+
+        favoriteMapper.insert(favorite);
     }
 
     @Override
-    public boolean removeFavorite(String productId, String userId){
-        return favoriteMapper.delete(new QueryWrapper<Favorite>().eq("product_id", productId).eq("user_id", userId)) > 0;
+    public void removeFavorite(FavoriteAddVO favoriteAddVO, String sessionId) {
+        User user = userService.getUserInfo(sessionId);
+        if (user == null) {
+            throw new RuntimeException("用户未登录");
+        }
+
+        // 删除收藏
+        QueryWrapper<Favorite> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq("user_id", user.getUserId())
+                .eq("product_id", favoriteAddVO.getProductId());
+
+        favoriteMapper.delete(queryWrapper);
     }
 
     @Override
-    public getFavoriteResponse getFavorites(int page, int limit, String userId){
-        if (page <= 0) {
-            page = 1; // 默认从第1页开始
+    public getFavoritesResponse getFavorites(String sessionId, Integer page, Integer limit) {
+        User user = userService.getUserInfo(sessionId);
+        if (user == null) {
+            throw new RuntimeException("用户未登录");
         }
-        if (limit <= 0) {
-            limit = 10; // 默认每页返回10条记录
-        }
-        LambdaQueryWrapper<Favorite> queryWrapper = new LambdaQueryWrapper<>();
-        queryWrapper.eq(Favorite::getUserId, userId); // 根据 user_id 查询
 
-        // 分页查询
-        Page<Favorite> favoritePage = new Page<>(page, limit);
-        Page<Favorite> resultPage = favoriteMapper.selectPage(favoritePage, queryWrapper);
+        // 默认分页参数
+        page = (page == null || page < 1) ? 1 : page;
+        limit = (limit == null || limit < 1) ? 10 : limit;
 
-        // 获取查询结果和总数
-        List<Favorite> favorites = resultPage.getRecords();
+        // 分页查询收藏
+        Page<Favorite> favoritePages = new Page<>(page, limit);
+        QueryWrapper<Favorite> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq("user_id", user.getUserId())
+                .orderByDesc("created_at");
 
-        int total = 0;
-        List<FavoriteResponse> favoriteResponses = new ArrayList<>();
+        Page<Favorite> favoritePage = favoriteMapper.selectPage(favoritePages, queryWrapper);
+        List<Favorite> favorites = favoritePage.getRecords();
+
+        // 构建响应
+        getFavoritesResponse response = new getFavoritesResponse();
+        response.setTotal((int) favoritePage.getTotal());
+
         for (Favorite favorite : favorites) {
-            Product product = productMapper.selectById(favorite.getProductId());
-            if (product != null) {
-                String thumbnail = imageMapper.selectOne(new QueryWrapper<Image>().eq("product_id", product.getProductId())).getImagePath();
-                favoriteResponses.add(new FavoriteResponse(product.getProductId(), product.getName(), product.getCurrentPrice(), thumbnail));
-                total ++;
+            Optional<Product> productOpt = productService.getProductById(favorite.getProductId());
+            if (productOpt.isPresent()) {
+                Product product = productOpt.get();
+                String thumbnail = ""; // 获取商品缩略图，暂时留空
+                response.addFavorite(
+                        product.getProductId(),
+                        product.getName(),
+                        product.getPrice().doubleValue(),
+                        thumbnail);
             }
         }
-        return new getFavoriteResponse(total, favoriteResponses);
+
+        return response;
     }
 }
+
