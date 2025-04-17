@@ -125,7 +125,7 @@ public class FavoriteServiceImpl extends ServiceImpl<FavoriteMapper, Favorite> i
                 response.addFavorite(
                         product.getProductId(),
                         product.getName(),
-                        product.getPrice().doubleValue(),
+                        productService.currentPrice(product.getProductId()).doubleValue(),
                         thumbnail);
             }
         }

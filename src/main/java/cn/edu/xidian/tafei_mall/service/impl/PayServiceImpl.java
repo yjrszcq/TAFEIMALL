@@ -3,8 +3,10 @@ package cn.edu.xidian.tafei_mall.service.impl;
 
 
 import cn.edu.xidian.tafei_mall.model.entity.Order;
+import cn.edu.xidian.tafei_mall.model.entity.User;
 import cn.edu.xidian.tafei_mall.service.OrderService;
 import cn.edu.xidian.tafei_mall.service.PayService;
+import cn.edu.xidian.tafei_mall.service.UserService;
 import lombok.Data;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -21,6 +23,9 @@ import java.util.concurrent.TimeUnit;
 public class PayServiceImpl implements PayService {
     @Autowired
     private OrderService orderService;
+    @Autowired
+    private UserService userService;
+
     // 模拟支付记录存储
     private final Map<String, PaymentRecord> paymentRecords = new ConcurrentHashMap<>();
     // 定时任务线程池
@@ -38,11 +43,21 @@ public class PayServiceImpl implements PayService {
     }
 
     @Override
-    public void createPayOrder(String orderId) {
+    public void createPayOrder(String orderId, String sessionId) {
+        if (sessionId == null) {
+            throw new RuntimeException("未登录");
+        }
+        User user = userService.getUserInfo(sessionId);
+        if (user == null) {
+            throw new RuntimeException("用户不存在");
+        }
         //获得订单信息
         Order order = orderService.getOrderById(orderId);
         if (order == null) {
             throw new RuntimeException("订单不存在");
+        }
+        if (!order.getUserId().equals(user.getUserId())) {
+            throw new RuntimeException("无权限操作该订单");
         }
         // 如果已支付则直接返回
         if ("paid".equals(order.getStatus())) {
