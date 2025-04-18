@@ -45,7 +45,7 @@ public class PromotionServiceImpl extends ServiceImpl<PromotionMapper, Promotion
     @Override
     public createPromotionResponse createPromotion(PromotionCreateVO promotionCreateVO, String userId) {
         try {
-            final DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH");
+            final DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
 
             if (promotionCreateVO == null) {
                 throw new IllegalArgumentException("促销信息不能为空");
@@ -129,7 +129,7 @@ public class PromotionServiceImpl extends ServiceImpl<PromotionMapper, Promotion
             }
             return new createPromotionResponse(promotion.getPromotionId());
         } catch (DateTimeParseException e) {
-            throw new IllegalArgumentException("日期格式不正确，应为yyyy-MM-dd HH");
+            throw new IllegalArgumentException("日期格式不正确，应为YYYY-MM-DD hh:mm");
         }
     }
 
