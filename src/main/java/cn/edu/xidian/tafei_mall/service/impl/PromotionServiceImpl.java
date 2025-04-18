@@ -65,13 +65,16 @@ public class PromotionServiceImpl extends ServiceImpl<PromotionMapper, Promotion
                 throw new IllegalArgumentException("折扣率必须大于0且小于等于100");
             }
 
-            LocalDateTime startDate = LocalDateTime.parse(promotionCreateVO.getStartDate(), DATE_TIME_FORMATTER);
+            if (promotionCreateVO.getEndDate() == null) {
+                throw new IllegalArgumentException("结束时间不能为空");
+            }
+            LocalDateTime startDate = promotionCreateVO.getStartDate() != null ? LocalDateTime.parse(promotionCreateVO.getStartDate(), DATE_TIME_FORMATTER) : LocalDateTime.now();
             LocalDateTime endDate = LocalDateTime.parse(promotionCreateVO.getEndDate(), DATE_TIME_FORMATTER);
+            if (startDate.isBefore(LocalDateTime.now())) {
+                startDate = LocalDateTime.now();
+            }
             if (endDate.isBefore(startDate)) {
                 throw new IllegalArgumentException("结束时间不能早于开始时间");
-            }
-            if (startDate.isBefore(LocalDateTime.now())) {
-                throw new IllegalArgumentException("开始时间不能早于当前时间");
             }
 
             List<String> NotExistProductIds = new ArrayList<>();
