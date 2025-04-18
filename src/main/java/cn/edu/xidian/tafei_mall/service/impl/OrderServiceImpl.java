@@ -94,6 +94,7 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
                 }
                 break;
             }
+            default: throw new IllegalArgumentException("Order status error");
         }
         order.setStatus(status);
         orderMapper.updateById(order);
