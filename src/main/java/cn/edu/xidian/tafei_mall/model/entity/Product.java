@@ -8,6 +8,8 @@ import java.io.Serial;
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.List;
+
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Getter;
@@ -26,6 +28,7 @@ import lombok.Setter;
 @TableName("product")
 @ApiModel(value = "Product对象", description = "商品表")
 public class Product implements Serializable {
+
     @Serial
     private static final long serialVersionUID = 1L;
 
@@ -41,21 +44,13 @@ public class Product implements Serializable {
     @TableField("description")
     private String description;
 
-    @ApiModelProperty("基准价格")
+    @ApiModelProperty("价格")
     @TableField("price")
     private BigDecimal price;
 
-    @ApiModelProperty("当前售价")
-    @TableField("current_price")
-    private BigDecimal currentPrice;
-
-    @ApiModelProperty("库存数量")
+    @ApiModelProperty("库存")
     @TableField("stock")
     private Integer stock;
-
-    @ApiModelProperty("是否促销")
-    @TableField("is_on_promotion")
-    private Boolean isOnPromotion;
 
     @ApiModelProperty("是否包邮")
     @TableField("is_free_shipping")
@@ -72,4 +67,8 @@ public class Product implements Serializable {
     @ApiModelProperty("更新时间")
     @TableField("updated_at")
     private LocalDateTime updatedAt;
+
+    @ApiModelProperty("商品图片URL列表")
+    @TableField(exist = false)
+    private List<String> mainPictures;
 }
