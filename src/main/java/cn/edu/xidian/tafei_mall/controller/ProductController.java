@@ -72,7 +72,7 @@ public class ProductController {
     }
 
     /**
-     * 添加商品到收藏夹
+     * 添加评论
      * @param sessionId Session ID
      * @param productId 商品ID
      * @return 是否成功
