@@ -152,7 +152,7 @@ public class SellerController {
     public ResponseEntity<?> getMonthlyReports(@RequestHeader("Session-Id") String sessionId,
                                                @RequestParam int year,
                                                @RequestParam int month,
-                                               @RequestParam boolean detail) {
+                                               @RequestParam(defaultValue = "false") boolean detail) {
         try{
             if (sessionId == null) {
                 return new ResponseEntity<>(new MessageResponse("未登录"), HttpStatus.UNAUTHORIZED);
