@@ -3,7 +3,7 @@ package cn.edu.xidian.tafei_mall.controller;
 
 import cn.edu.xidian.tafei_mall.model.entity.User;
 import cn.edu.xidian.tafei_mall.model.vo.OrderCreateVO;
-import cn.edu.xidian.tafei_mall.model.vo.Response.Buyer.createOrderResponse;
+import cn.edu.xidian.tafei_mall.model.vo.Response.Order.createOrderResponse;
 import cn.edu.xidian.tafei_mall.model.vo.Response.Order.getOrderResponse;
 import cn.edu.xidian.tafei_mall.model.vo.Response.Order.MessageResponse;
 import cn.edu.xidian.tafei_mall.service.OrderService;

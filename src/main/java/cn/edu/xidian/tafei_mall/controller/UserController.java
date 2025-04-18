@@ -1,5 +1,6 @@
 package cn.edu.xidian.tafei_mall.controller;
 
+import cn.edu.xidian.tafei_mall.model.entity.User;
 import cn.edu.xidian.tafei_mall.model.vo.*;
 import cn.edu.xidian.tafei_mall.model.vo.Response.Address.AddressResponse;
 import cn.edu.xidian.tafei_mall.model.vo.Response.Address.getAddressResponse;
@@ -28,8 +29,7 @@ import org.springframework.web.bind.annotation.*;
 public class UserController {
     @Autowired
     private AddressService addressService;
-
-    @Autowired
+    @Autowired(required = false)
     private FavoriteService favoriteService;
 
     @PostMapping("/address")

@@ -1,9 +1,12 @@
+
 package cn.edu.xidian.tafei_mall.service.impl;
 
 
 import cn.edu.xidian.tafei_mall.model.entity.Order;
+import cn.edu.xidian.tafei_mall.model.entity.User;
 import cn.edu.xidian.tafei_mall.service.OrderService;
 import cn.edu.xidian.tafei_mall.service.PayService;
+import cn.edu.xidian.tafei_mall.service.UserService;
 import lombok.Data;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -20,6 +23,9 @@ import java.util.concurrent.TimeUnit;
 public class PayServiceImpl implements PayService {
     @Autowired
     private OrderService orderService;
+    @Autowired
+    private UserService userService;
+
     // 模拟支付记录存储
     private final Map<String, PaymentRecord> paymentRecords = new ConcurrentHashMap<>();
     // 定时任务线程池
@@ -37,11 +43,14 @@ public class PayServiceImpl implements PayService {
     }
 
     @Override
-    public void createPayOrder(String orderId) {
+    public void createPayOrder(String orderId, String userId) {
         //获得订单信息
         Order order = orderService.getOrderById(orderId);
         if (order == null) {
             throw new RuntimeException("订单不存在");
+        }
+        if (!order.getUserId().equals(userId)) {
+            throw new RuntimeException("无权限操作该订单");
         }
         // 如果已支付则直接返回
         if ("paid".equals(order.getStatus())) {
@@ -64,8 +73,7 @@ public class PayServiceImpl implements PayService {
         scheduler.schedule(() -> {
             // 模拟支付成功
             record.setPaid(true);
-            order.setStatus("paid");
-            orderService.updateById(order);
+            orderService.updateOrderStatus(orderId, "paid");
 
             // 模拟异步通知
             sendPaymentNotification(orderId);
