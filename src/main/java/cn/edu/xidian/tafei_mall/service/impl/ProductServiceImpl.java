@@ -1,22 +1,28 @@
 package cn.edu.xidian.tafei_mall.service.impl;
 
 import cn.edu.xidian.tafei_mall.mapper.ImageMapper;
+import cn.edu.xidian.tafei_mall.mapper.PromotionMapper;
+import cn.edu.xidian.tafei_mall.mapper.PromotionProductMapper;
 import cn.edu.xidian.tafei_mall.model.entity.Image;
 import cn.edu.xidian.tafei_mall.model.entity.Product;
 import cn.edu.xidian.tafei_mall.mapper.ProductMapper;
+import cn.edu.xidian.tafei_mall.model.entity.Promotion;
+import cn.edu.xidian.tafei_mall.model.entity.PromotionProduct;
 import cn.edu.xidian.tafei_mall.model.vo.ProductSimpleVO;
 import cn.edu.xidian.tafei_mall.model.vo.ProductVO;
 import cn.edu.xidian.tafei_mall.model.vo.Response.Seller.getProductResponse;
-import cn.edu.xidian.tafei_mall.service.ImageService;
 import cn.edu.xidian.tafei_mall.service.ProductService;
 import cn.hutool.core.bean.BeanUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import jakarta.annotation.Resource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.UUID;
 import java.util.HashMap;
 import java.util.List;
@@ -41,6 +47,12 @@ public class ProductServiceImpl extends ServiceImpl<ProductMapper, Product> impl
 
     @Resource
     private ImageMapper imageMapper;
+
+    @Resource
+    private PromotionProductMapper promotionProductMapper;
+
+    @Resource
+    private PromotionMapper promotionMapper;
 
   @Override
   public Map<String, Object> searchProducts(String keyword, int page, int limit) {
@@ -186,5 +198,30 @@ public class ProductServiceImpl extends ServiceImpl<ProductMapper, Product> impl
     public getProductResponse getProduct(String userId) {
         List<Product> products = productMapper.selectList(new LambdaQueryWrapper<Product>().eq(Product::getSellerId, userId));
         return new getProductResponse(products);
+    }
+
+    @Override
+    public BigDecimal currentPrice(String productId) {
+        Product product = productMapper.selectById(productId);
+        if (product == null) {
+            return BigDecimal.ZERO;
+        }
+
+        List<PromotionProduct> promotionProducts = promotionProductMapper.selectList(new QueryWrapper<PromotionProduct>().eq("product_id", productId));
+        if (promotionProducts != null && !promotionProducts.isEmpty()) {
+            // 如果有促销活动，返回促销价格
+            for (PromotionProduct promotionProduct : promotionProducts) {
+                Promotion promotion = promotionMapper.selectById(promotionProduct.getPromotionId());
+                if (promotion != null) {
+                    // 促销活动有效
+                    if (promotion.getIsActive() && promotion.getStartDate().isBefore(LocalDateTime.now()) && promotion.getEndDate().isAfter(LocalDateTime.now())) {
+                        // 计算折扣价格
+                        return product.getPrice().multiply(BigDecimal.valueOf(100).subtract(promotionProduct.getDiscountRate()).multiply(BigDecimal.valueOf(0.01)));
+                    }
+                }
+            }
+        }
+
+        return product.getPrice();
     }
 }

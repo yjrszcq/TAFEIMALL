@@ -48,6 +48,10 @@ public class Product implements Serializable {
     @TableField("price")
     private BigDecimal price;
 
+    @ApiModelProperty("当前价格")
+    @TableField("current_price")
+    private BigDecimal currentPrice;
+
     @ApiModelProperty("库存")
     @TableField("stock")
     private Integer stock;
