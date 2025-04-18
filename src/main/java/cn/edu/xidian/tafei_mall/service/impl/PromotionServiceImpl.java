@@ -102,13 +102,13 @@ public class PromotionServiceImpl extends ServiceImpl<PromotionMapper, Promotion
                 }
             }
             if (!isExist) {
-                throw new RuntimeException("以下商品不存在或已下架: " + String.join(",", NotExistProductIds));
+                throw new RuntimeException("The following product(s) do not exist or have been removed from the shelf: " + String.join(",", NotExistProductIds));
             }
             if (!hasPermission) {
-                throw new RuntimeException("以下商品无权限操作: " + String.join(",", DoNotHavePermissionProductIds));
+                throw new RuntimeException("No permission to operate the following products: " + String.join(",", DoNotHavePermissionProductIds));
             }
             if (isOnPromotion) {
-                throw new RuntimeException("以下商品已参与其他促销: " + String.join(",", onPromotionProducts));
+                throw new RuntimeException("The following products have already been included in other promotions: " + String.join(",", onPromotionProducts));
             }
 
             // 创建促销信息
