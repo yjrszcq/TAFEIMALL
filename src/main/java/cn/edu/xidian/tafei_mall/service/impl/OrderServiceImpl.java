@@ -71,18 +71,49 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
                     throw new IllegalArgumentException("Order cannot be paid");
                 }
                 Cart cart = cartMapper.selectOne(new QueryWrapper<Cart>().eq("user_id", order.getUserId()));
-                List<CartItem> cartItems = cartItemMapper.selectList(new QueryWrapper<CartItem>().eq("cart_id", cart.getCartId()));
+                List<OrderItem> orderItems = orderItemService.getOrderItemByOrderId(orderId);
                 Map<CartItem, Product> products = new HashMap<>();
                 // 验证购物车商品是否存在，库存是否足够
-                for (CartItem cartItem : cartItems) {
+                List<String> orderItemIds = new ArrayList<>();
+                boolean cartItemExists = true;
+                List<String> productIdsOfNotExist = new ArrayList<>();
+                boolean productExists = true;
+                List<String> productIdsOfNotEnough = new ArrayList<>();
+                boolean productStockEnough = true;
+                for (OrderItem orderItem : orderItems) {
+                    CartItem cartItem = cartItemMapper.selectOne(new QueryWrapper<CartItem>().eq("cart_id", cart.getCartId()).eq("product_id", orderItem.getProductId()));
+                    if (cartItem == null) {
+                        orderItemIds.add(orderItem.getOrderItemId());
+                        cartItemExists = false;
+                    }
+                    if (!cartItemExists) {
+                        continue;
+                    }
                     Optional<Product> product = productService.getProductById(cartItem.getProductId());
                     if (product.isEmpty()) {
-                        throw new IllegalArgumentException("Invalid product ID");
+                        productIdsOfNotExist.add(orderItem.getProductId());
+                        productExists = false;
+                    }
+                    if (!productExists) {
+                        continue;
                     }
                     if (cartItem.getQuantity() > product.get().getStock()) {
-                        throw new IllegalArgumentException("Insufficient stock");
+                        productIdsOfNotEnough.add(orderItem.getProductId());
+                        productStockEnough = false;
+                    }
+                    if (!productStockEnough) {
+                        continue;
                     }
                     products.put(cartItem, product.get());
+                }
+                if (!cartItemExists) {
+                    throw new IllegalArgumentException("Order item not found in cart: " + String.join(",", orderItemIds));
+                }
+                if (!productExists) {
+                    throw new IllegalArgumentException("Product not found: " + String.join(",", productIdsOfNotExist));
+                }
+                if (!productStockEnough) {
+                    throw new IllegalArgumentException("Product not enough: " + String.join(",", productIdsOfNotEnough));
                 }
                 // 清空购物车，商品库存减少
                 for (Map.Entry<CartItem, Product> entry : products.entrySet()) {
