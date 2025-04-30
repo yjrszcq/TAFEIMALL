@@ -32,7 +32,7 @@ import java.util.Map;
  */
 
 @RestController
-@RequestMapping("/api/seller")
+@RequestMapping("/api/v1/seller")
 @SessionAttributes(value = "sellerid")
 public class SellerController {
 

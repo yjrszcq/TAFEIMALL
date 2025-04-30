@@ -23,7 +23,7 @@ import org.springframework.web.bind.annotation.*;
  *
  */
 @RestController
-@RequestMapping("/api/promotions")
+@RequestMapping("/api/v1/promotions")
 public class PromotionController {
     @Autowired
     private PromotionService promotionService;
