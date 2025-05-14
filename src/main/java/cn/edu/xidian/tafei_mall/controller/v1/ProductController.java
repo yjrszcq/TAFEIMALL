@@ -5,6 +5,7 @@ import cn.edu.xidian.tafei_mall.model.entity.Review;
 import cn.edu.xidian.tafei_mall.model.entity.User;
 import cn.edu.xidian.tafei_mall.model.vo.*;
 import cn.edu.xidian.tafei_mall.model.vo.Response.Order.MessageResponse;
+import cn.edu.xidian.tafei_mall.model.vo.Response.Product.getProductDetailResponse;
 import cn.edu.xidian.tafei_mall.model.vo.Response.Promotion.getPromotionResponse;
 import cn.edu.xidian.tafei_mall.model.vo.Response.Review.createReviewResponse;
 import cn.edu.xidian.tafei_mall.model.vo.Response.Review.getReviewResponse;
@@ -66,9 +67,12 @@ public class ProductController {
      */
     @GetMapping("/{productId}")
     public ResponseEntity<?> getProductDetails(@PathVariable String productId) {
-        Optional<Product> product = productService.getProductById(productId);
-        return product.map(ResponseEntity::ok)
-                .orElseGet(() -> ResponseEntity.notFound().build());
+        try {
+            getProductDetailResponse response = productService.getProductDetail(productId);
+            return new ResponseEntity<>(response, HttpStatus.OK);
+        } catch (Exception e) {
+            return new ResponseEntity<>(new MessageResponse(e.getMessage()), HttpStatus.BAD_REQUEST);
+        }
     }
 
     /**

@@ -108,7 +108,7 @@ public class SellerController {
         if (user == null) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
-        getProductResponse response = productService.getProduct(user.getUserId());
+        getProductResponse response = productService.getProductListBySeller(user.getUserId());
         return ResponseEntity.ok().body(response);
     }
 
