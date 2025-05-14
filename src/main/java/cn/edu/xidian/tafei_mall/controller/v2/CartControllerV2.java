@@ -29,7 +29,7 @@ import java.net.URI;
 
 @RestController
 @RequestMapping("/api/v2/cart")
-public class CartController {
+public class CartControllerV2 {
     @Autowired
     private CartService cartService;
 

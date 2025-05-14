@@ -1,6 +1,5 @@
-package cn.edu.xidian.tafei_mall.controller;
+package cn.edu.xidian.tafei_mall.controller.v1;
 
-import cn.edu.xidian.tafei_mall.model.entity.User;
 import cn.edu.xidian.tafei_mall.model.vo.*;
 import cn.edu.xidian.tafei_mall.model.vo.Response.Address.AddressResponse;
 import cn.edu.xidian.tafei_mall.model.vo.Response.Address.getAddressResponse;

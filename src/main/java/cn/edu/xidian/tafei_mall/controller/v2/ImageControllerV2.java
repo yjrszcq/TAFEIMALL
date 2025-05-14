@@ -32,7 +32,7 @@ import java.net.URI;
 
 @RestController
 @RequestMapping("/api/v2/image")
-public class ImageController {
+public class ImageControllerV2 {
     @Autowired
     private ProductService productService;
 

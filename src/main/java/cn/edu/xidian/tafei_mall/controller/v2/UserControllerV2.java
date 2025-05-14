@@ -26,7 +26,7 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/v2/users")
-public class UserController {
+public class UserControllerV2 {
     @Autowired
     private AddressService addressService;
     @Autowired(required = false)

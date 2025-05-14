@@ -1,4 +1,4 @@
-package cn.edu.xidian.tafei_mall.controller;
+package cn.edu.xidian.tafei_mall.controller.v1;
 
 
 import cn.edu.xidian.tafei_mall.model.entity.User;
@@ -11,13 +11,11 @@ import cn.edu.xidian.tafei_mall.model.vo.Response.Seller.addProductResponse;
 import cn.edu.xidian.tafei_mall.model.vo.Response.Seller.getProductResponse;
 import cn.edu.xidian.tafei_mall.model.vo.Response.Seller.updateOrderResponse;
 import cn.edu.xidian.tafei_mall.service.*;
-import lombok.Getter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.*;
 import org.springframework.web.bind.annotation.*;
 
 import java.net.URI;
-import java.util.Map;
 
 
 /**

@@ -14,7 +14,7 @@ import java.net.URI;
 
 @RestController
 @RequestMapping("/api/v2/payment")
-public class PayController {
+public class PayControllerV2 {
     // 这里是支付相关的接口
     // 例如：创建订单、查询订单状态等
 

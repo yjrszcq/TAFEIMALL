@@ -26,7 +26,7 @@ import org.springframework.web.bind.annotation.RestController;
  */
 @RestController
 @RequestMapping("/api/v2/promotions")
-public class PromotionController {
+public class PromotionControllerV2 {
     @Autowired
     private PromotionService promotionService;
     @GetMapping("/active")

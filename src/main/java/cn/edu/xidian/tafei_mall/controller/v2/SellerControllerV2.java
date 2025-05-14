@@ -35,7 +35,7 @@ import java.net.URI;
 @RestController
 @RequestMapping("/api/v2/seller")
 @SessionAttributes(value = "sellerid")
-public class SellerController {
+public class SellerControllerV2 {
 
     @Autowired
     private UserService userService;

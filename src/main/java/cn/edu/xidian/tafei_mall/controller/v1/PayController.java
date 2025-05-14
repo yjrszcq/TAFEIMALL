@@ -1,4 +1,4 @@
-package cn.edu.xidian.tafei_mall.controller;
+package cn.edu.xidian.tafei_mall.controller.v1;
 
 
 import cn.edu.xidian.tafei_mall.model.entity.User;

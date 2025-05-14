@@ -18,7 +18,7 @@ import org.springframework.web.bind.annotation.*;
 @ApiKeyAuthDefinition(key = "Session-ID", in = ApiKeyAuthDefinition.ApiKeyLocation.HEADER, name = "Session-ID")
 @RestController
 @RequestMapping("/api/v2/orders")
-public class OrderController {
+public class OrderControllerV2 {
     @Autowired
     private OrderService orderService;
     @Autowired

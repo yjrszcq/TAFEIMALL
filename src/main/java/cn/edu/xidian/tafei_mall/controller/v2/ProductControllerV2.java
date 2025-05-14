@@ -32,7 +32,7 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("/api/v2/products")
-public class ProductController {
+public class ProductControllerV2 {
     @Autowired
     private ProductService productService;
     @Autowired
