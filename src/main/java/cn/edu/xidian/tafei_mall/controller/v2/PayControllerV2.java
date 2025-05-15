@@ -166,7 +166,7 @@ public class PayControllerV2 {
                 "<body>" +
                 "    <div class=\"message-box\">" +
                 "        <p>" + result + "，<span id=\"countdown\">3</span>秒后返回主页</p>" +
-                "        <p>如果超时未返回，请<a href=\"" + redirectUrl + "\">点击此处跳转页面</a></p>" +
+                "        <p>如果超时未返回，请<a href=\"" + redirectUrl + "\">点击此处</a>跳转页面</p>" +
                 "    </div>" +
                 "    <script>" +
                 "        let seconds = 3;" +
