@@ -366,7 +366,7 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
                     throw new IllegalArgumentException("Order must be paid");
                 }
                 order.setStatus("shipping");
-                // order.setTrackingNumber(orderUpdateVO.getTrackingNumber());
+                order.setTrackingNumber(orderUpdateVO.getTrackingNumber());
                 order.setUpdatedAt(LocalDateTime.now());
                 orderMapper.updateById(order);
                 if (Objects.equals(order.getStatus(), "shipping")) {
@@ -443,6 +443,6 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
             orderItemResponses.add(new OrderItemResponse(orderItem.getOrderItemId(), orderItem.getProductId(), product.get().getName(), orderItem.getQuantity(), orderItem.getPrice()));
         }
         // 生成订单详情
-        return new OrderResponse(order.getOrderId(), order.getStatus(), userName, sellerName, address.getCity(), address.getAddress(), address.getPostalCode(), "order.getTrackingNumber()", new getOrderItemResponse(orderItemResponses));
+        return new OrderResponse(order.getOrderId(), order.getStatus(), userName, sellerName, address.getCity(), address.getAddress(), address.getPostalCode(), order.getTrackingNumber(), new getOrderItemResponse(orderItemResponses));
     }
 }
