@@ -92,8 +92,10 @@ public class PayControllerV2 {
         try{
             alipayResponse res = payService.AliPayReturn(getRequestInfo(request));
             if(res.getCode().equals("success")){
+                httpResponse.setStatus(HttpServletResponse.SC_OK);
                 httpResponse.getWriter().write(returnPage(webUrl, true));
             } else {
+                httpResponse.setStatus(HttpServletResponse.SC_BAD_REQUEST);
                 httpResponse.getWriter().write(returnPage(webUrl, false));
             }
             httpResponse.getWriter().flush();
