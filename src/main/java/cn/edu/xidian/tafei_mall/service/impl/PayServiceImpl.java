@@ -58,7 +58,6 @@ public class PayServiceImpl implements PayService {
             throw new RuntimeException("订单已取消");
         }
         try {
-            // 支付宝产品码
             AlipayTradePagePayResponse response = alipay.pay(order.getOrderId(), order.getTotalAmount().doubleValue(), "测试商品", "FAST_INSTANT_TRADE_PAY");
             scheduleCancelTask(orderId); // 启动超时任务
             return new createPaymentResponse(response.getBody(), alipay.getCHAR_SET());
