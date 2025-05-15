@@ -236,7 +236,7 @@ class Alipay {
             // 同步验证成功
             result.put("code", "success");
             result.put("trade_status", params.get("trade_status")); //交易状态
-            result.put("out_trade_no", params.get("out_trade_no")); // billId
+            result.put("out_trade_no", params.get("out_trade_no")); // orderId
             result.put("trade_no", params.get("trade_no"));
             result.put("total_amount", params.get("total_amount"));
         } else {
