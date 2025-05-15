@@ -17,6 +17,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -209,9 +210,9 @@ public class PayControllerV2 {
                 // 在浏览器打开这个链接时，前端应显示等待页面，同时向后端查询支付状态，确认支付成功后，应跳转到成功页面
                 httpResponse.setStatus(HttpServletResponse.SC_OK);
                 redirectUrl += "/waiting?"
-                        + "tradeNo=" + URLEncoder.encode(res.getTradeNo(), "UTF-8")
-                        + "&outTradeNo=" + URLEncoder.encode(res.getOutTradeNo(), "UTF-8")
-                        + "&amount=" + URLEncoder.encode(res.getTotalAmount(), "UTF-8");
+                        + "tradeNo=" + URLEncoder.encode(res.getTradeNo(), StandardCharsets.UTF_8)
+                        + "&outTradeNo=" + URLEncoder.encode(res.getOutTradeNo(), StandardCharsets.UTF_8)
+                        + "&amount=" + URLEncoder.encode(res.getTotalAmount(), StandardCharsets.UTF_8);
             } else {
                 httpResponse.setStatus(HttpServletResponse.SC_BAD_REQUEST);
                 redirectUrl += "/failed";
@@ -219,7 +220,7 @@ public class PayControllerV2 {
             httpResponse.sendRedirect(redirectUrl);
         } catch (Exception e) {
             httpResponse.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-            redirectUrl += "/error?=" + URLEncoder.encode(e.getMessage(), "UTF-8");
+            redirectUrl += "/error?=" + URLEncoder.encode(e.getMessage(), StandardCharsets.UTF_8);
             httpResponse.sendRedirect(redirectUrl);
         }
     }
