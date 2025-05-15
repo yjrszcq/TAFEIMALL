@@ -229,18 +229,15 @@ class Alipay {
         return alipayClient.pageExecute(request);
     }
 
-    public Map<String, String> notify(Map<String, String> params) throws Exception { // 同步验证
-        // 获取支付宝的通知返回参数
+    public Map<String, String> notify(Map<String, String> params) throws Exception { //调用SDK验证签名
         Map<String, String> result = new HashMap<>();
-        if (AlipaySignature.rsaCheckV1(params, ALIPAY_PUBLIC_KEY, CHAR_SET, SIGN_TYPE)) { //调用SDK验证签名
-            // 同步验证成功
+        if (AlipaySignature.rsaCheckV1(params, ALIPAY_PUBLIC_KEY, CHAR_SET, SIGN_TYPE)) { // 验签成功
             result.put("code", "success");
             result.put("trade_status", params.get("trade_status")); //交易状态
             result.put("out_trade_no", params.get("out_trade_no")); // orderId
             result.put("trade_no", params.get("trade_no"));
             result.put("total_amount", params.get("total_amount"));
-        } else {
-            // 验签失败
+        } else { // 验签失败
             result.put("code", "failed");
         }
         result.put("method", "alipay");
