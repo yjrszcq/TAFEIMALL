@@ -188,11 +188,11 @@ public class PayControllerV2 {
     }
 
     // 后端测试支付用
-    @GetMapping("/pay")
+    @GetMapping("/test/pay")
     public ResponseEntity<?> createOrderTest(HttpServletResponse httpResponse){
         try {
             // 这里可以调用订单服务来创建订单（手动填写 OrderId 和 UserId）
-            createPaymentResponse response = payService.createPayOrder("8121842f-2c23-4cc9-915f-ce1c6251033e", "92fca2bc-c9b4-477b-8c06-a82576ddadc5");
+            createPaymentResponse response = payService.createPayOrder("04d6e2cc-afa2-411b-adc1-c84027212ca9", "92fca2bc-c9b4-477b-8c06-a82576ddadc5");
             // 直接将html表单（支付宝官方支付页面）返回给浏览器
             httpResponse.setContentType("text/html;charset=" + response.getCharset());
             httpResponse.getWriter().write(response.getForm());
@@ -205,7 +205,7 @@ public class PayControllerV2 {
     }
 
     // 比较好的想法，可惜这次估计用不上了，我想把它留下来
-    @GetMapping("/return/test")
+    @GetMapping("/test/return")
     public void returnUrlTest(HttpServletRequest request, HttpServletResponse httpResponse) throws Exception {
         String redirectUrl = "http://localhost:5173/callback";
         try{

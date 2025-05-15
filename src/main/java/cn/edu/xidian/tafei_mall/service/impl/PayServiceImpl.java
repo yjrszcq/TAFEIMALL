@@ -58,7 +58,8 @@ public class PayServiceImpl implements PayService {
             throw new RuntimeException("订单已取消");
         }
         try {
-            AlipayTradePagePayResponse response = alipay.pay(order.getOrderId(), order.getTotalAmount().doubleValue());
+            // 支付宝产品码
+            AlipayTradePagePayResponse response = alipay.pay(order.getOrderId(), order.getTotalAmount().doubleValue(), "测试商品", "FAST_INSTANT_TRADE_PAY");
             scheduleCancelTask(orderId); // 启动超时任务
             return new createPaymentResponse(response.getBody(), alipay.getCHAR_SET());
         } catch (AlipayApiException e) {
@@ -209,7 +210,7 @@ class Alipay {
     @Value("${api.alipay.timeout-express}")
     private String TIMEOUT_EXPRESS;
 
-    public AlipayTradePagePayResponse pay(String outTradeNo, double totalAmount) throws AlipayApiException { // 支付宝支付请求
+    public AlipayTradePagePayResponse pay(String outTradeNo, double totalAmount, String subject, String product_code) throws AlipayApiException { // 支付宝支付请求
         // 初始化支付宝客户端服务
         AlipayClient alipayClient = new DefaultAlipayClient(GATEWAY_URL,APP_ID,APP_PRIVATE_KEY,"json",CHAR_SET,ALIPAY_PUBLIC_KEY,SIGN_TYPE);
         AlipayTradePagePayRequest request = new AlipayTradePagePayRequest();
@@ -219,11 +220,10 @@ class Alipay {
         JSONObject bizContent = new JSONObject();
         bizContent.put("out_trade_no", outTradeNo);
         bizContent.put("total_amount", totalAmount);
-        bizContent.put("subject", "测试商品");
-        bizContent.put("product_code", "FAST_INSTANT_TRADE_PAY");
+        bizContent.put("subject", subject);
+        bizContent.put("product_code", product_code);
         bizContent.put("timeout_express", TIMEOUT_EXPRESS); // 超时时间
         bizContent.put("seller_id", ALIPAY_PAYEE);
-
         request.setBizContent(bizContent.toString());
         // 发送请求
         return alipayClient.pageExecute(request);
