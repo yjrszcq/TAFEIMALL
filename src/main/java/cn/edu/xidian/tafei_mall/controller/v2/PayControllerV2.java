@@ -40,9 +40,6 @@ public class PayControllerV2 {
                                          @PathVariable("orderId") String orderId,
                                          HttpServletResponse httpResponse){
         try {
-            // 处理创建订单的逻辑
-            // 这里可以调用订单服务来创建订单
-            // 假设创建订单成功，返回201 Created
             if (orderId == null || orderId.isEmpty()) {
                 return ResponseEntity.badRequest().body("订单ID不能为空");
             }
@@ -53,7 +50,7 @@ public class PayControllerV2 {
             if (user == null) {
                 return ResponseEntity.status(401).body("用户不存在");
             }
-            // 这里可以调用订单服务来创建订单
+            // 创建支付订单
             createPaymentResponse response = payService.createPayOrder(orderId, user.getUserId());
             // 直接将html表单（支付宝官方支付页面）返回给浏览器
             httpResponse.setContentType("text/html;charset=" + response.getCharset());
@@ -78,7 +75,7 @@ public class PayControllerV2 {
         if (userService.getUserInfo(sessionId) == null) {
             return ResponseEntity.status(401).body("用户不存在");
         }
-        // 这里可以调用订单服务来查询订单状态
+        // 查询订单状态
         try {
             boolean flag = payService.queryOrderStatus(orderId);
             if (flag) {
