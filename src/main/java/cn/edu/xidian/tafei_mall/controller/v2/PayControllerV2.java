@@ -153,15 +153,15 @@ public class PayControllerV2 {
                 "            font-family: Arial, sans-serif;" +
                 "        }" +
                 "        .message-box {" +
-                "            background-color: #faf0e6;" + // 新方框颜色
+                "            background-color: #faf0e6;" + // 方框颜色
                 "            padding: 2rem;" +
                 "            border-radius: 8px;" +
                 "            text-align: center;" +
-                "            color: #d86f6f;" +   // 注意：实际应为6位HEX
+                "            color: #d86f6f;" +   // 字体颜色
                 "        }" +
                 "        a {" +
                 "            text-decoration: underline;" +
-                "            color: #ff99cc;" +  // 新链接颜色
+                "            color: #ff99cc;" +  // 链接颜色
                 "            cursor: pointer;" +
                 "        }" +
                 "    </style>" +
