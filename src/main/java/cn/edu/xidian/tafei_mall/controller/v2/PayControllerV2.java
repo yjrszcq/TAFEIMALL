@@ -23,8 +23,6 @@ import java.util.Map;
 @RestController
 @RequestMapping("/api/v2/payment")
 public class PayControllerV2 {
-    // 这里是支付相关的接口
-    // 例如：创建订单、查询订单状态等
     @Autowired
     private UserService userService;
 
@@ -34,7 +32,6 @@ public class PayControllerV2 {
     @Value("${web.web-url}")
     private String webUrl;
 
-    // 示例接口
     @PostMapping("/{orderId}")
     public ResponseEntity<?> createOrder(@RequestHeader("Session-Id") String sessionId,
                                          @PathVariable("orderId") String orderId,
