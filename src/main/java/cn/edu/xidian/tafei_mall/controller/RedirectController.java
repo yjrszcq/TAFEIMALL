@@ -13,7 +13,7 @@ public class RedirectController {
     String webUrl;
 
     @GetMapping("")
-    public void redirectToHomePage(HttpServletResponse httpResponse) throws IOException {
+    public void redirectToWebBaseUrl(HttpServletResponse httpResponse) throws IOException {
         httpResponse.setStatus(HttpServletResponse.SC_OK);
         httpResponse.sendRedirect(webUrl);
     }
