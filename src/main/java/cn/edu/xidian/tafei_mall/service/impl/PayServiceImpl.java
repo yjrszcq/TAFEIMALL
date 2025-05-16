@@ -71,8 +71,9 @@ public class PayServiceImpl implements PayService {
         // 同步验证，仅检查参数是否正确，签名是否无误等
         // 处理支付宝同步返回的参数
         try {
-            Map<String, String> result = alipay.notify(params);
-            return new alipayResponse(result.get("code"), result.get("trade_status"), result.get("out_trade_no"), result.get("trade_no"), result.get("total_amount"));
+            Map<String, String> result = alipay.notify(params); // 此时支付宝可能还未完成扣款，因此 res 的 TradeStatus=null
+            String status = queryOrderStatus(result.get("out_trade_no")) ? "TRADE_SUCCESS" : ""; // 但由于支付宝的延迟，异步验证有可能会比同步验证先到，所以可以提前判断是否扣款成功
+            return new alipayResponse(result.get("code"), status, result.get("out_trade_no"), result.get("trade_no"), result.get("total_amount"));
         } catch (Exception e) {
             throw new RuntimeException(e);
         }

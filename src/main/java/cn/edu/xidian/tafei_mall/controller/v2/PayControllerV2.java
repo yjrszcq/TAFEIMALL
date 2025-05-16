@@ -93,16 +93,17 @@ public class PayControllerV2 {
             alipayResponse res = payService.AliPayReturn(getRequestInfo(request));
             if(res.getCode().equals("success")){
                 httpResponse.setStatus(HttpServletResponse.SC_OK);
-                httpResponse.getWriter().write(returnPage(webUrl, true));
+                int flag = res.getTradeStatus().equals("TRADE_SUCCESS") ? 2 : 1;
+                httpResponse.getWriter().write(returnPage(webUrl, flag));
             } else {
                 httpResponse.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-                httpResponse.getWriter().write(returnPage(webUrl, false));
+                httpResponse.getWriter().write(returnPage(webUrl, 0));
             }
             httpResponse.getWriter().flush();
             httpResponse.getWriter().close();
         } catch (Exception e) {
             httpResponse.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-            httpResponse.getWriter().write(returnPage(webUrl, false));
+            httpResponse.getWriter().write(returnPage(webUrl, -1));
             httpResponse.getWriter().flush();
             httpResponse.getWriter().close();
         }
@@ -133,8 +134,14 @@ public class PayControllerV2 {
         return params;
     }
 
-    private static String returnPage(String redirectUrl, boolean flag){
-        String result = flag ? "等待扣款结果" : "支付失败";
+    private static String returnPage(String redirectUrl, int flag){
+        String result = switch (flag) {
+            case 0 -> "购买失败，请稍后再试";
+            case 1 -> "等待扣款结果";
+            case 2 -> "购买成功，感谢您的惠顾";
+            case -1 -> "发生错误，若果您已支付，请联系客服";
+            default -> "未知错误";
+        };
         return "<!DOCTYPE html>" +
                 "<html>" +
                 "<head>" +
@@ -189,7 +196,7 @@ public class PayControllerV2 {
     public ResponseEntity<?> createOrderTest(HttpServletResponse httpResponse){
         try {
             // 这里可以调用订单服务来创建订单（手动填写 OrderId 和 UserId）
-            createPaymentResponse response = payService.createPayOrder("04d6e2cc-afa2-411b-adc1-c84027212ca9", "92fca2bc-c9b4-477b-8c06-a82576ddadc5");
+            createPaymentResponse response = payService.createPayOrder("fc0246b3-97b5-4636-8a85-b53c95fa9da2", "92fca2bc-c9b4-477b-8c06-a82576ddadc5");
             // 直接将html表单（支付宝官方支付页面）返回给浏览器
             httpResponse.setContentType("text/html;charset=" + response.getCharset());
             httpResponse.getWriter().write(response.getForm());
