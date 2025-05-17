@@ -25,6 +25,11 @@ services:
       ALIPAY_CHAR_SET: utf-8
       ALIPAY_TIMEOUT_EXPRESS: 10m
 
+      # Lsky Pro配置
+      LSKY_PRO_API_URL: ""
+      LSKY_PRO_AUTH_TOKEN: ""
+      LSKY_PRO_STRATEGY_ID: 1
+
     volumes:
       - ./uploads:/app/uploads
     depends_on:
