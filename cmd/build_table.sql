@@ -9,7 +9,7 @@ create table t_promotions
 
 create table permission
 (
-    permission_id varchar(36)                                not null comment '权限ID' -- 0 不可查看 1 可查看， 2 可修改， 3 可删除
+    permission_id varchar(36)                                not null comment '权限ID' -- 0 不可查看， 1 可查看， 2 可修改， 3 可删除
         primary key,
     cart_permission     tinyint default 0                   not null comment '购物车管理权限',
     order_permission    tinyint default 0                   not null comment '订单管理权限',
