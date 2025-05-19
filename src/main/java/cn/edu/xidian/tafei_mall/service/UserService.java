@@ -17,7 +17,7 @@ public interface UserService extends IService<User> {
     /**
      * 登录
      */
-    String login(LoginRequestVO loginRequestVO);
+    String login(LoginRequestVO loginRequestVO) throws NoSuchFieldException, IllegalAccessException;
 
     /**
      * 注册

@@ -46,6 +46,14 @@ public class User implements Serializable {
     @TableField("email")
     private String email;
 
+    @ApiModelProperty("手机号码")
+    @TableField("phone")
+    private String phone;
+
+    @ApiModelProperty("角色")
+    @TableField("role_id")
+    private String roleId;
+
     @ApiModelProperty("创建时间")
     @TableField("created_at")
     private LocalDateTime createdAt;

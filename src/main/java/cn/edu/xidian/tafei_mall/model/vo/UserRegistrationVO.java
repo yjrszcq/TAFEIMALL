@@ -21,5 +21,7 @@ public class UserRegistrationVO {
      */
     private String email;
 
-    // Getters and Setters
+    private String phone;
+
+    private String roleId;
 }

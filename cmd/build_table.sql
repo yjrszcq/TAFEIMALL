@@ -7,6 +7,22 @@ create table t_promotions
     is_active    tinyint(1) default 1 null
 );
 
+
+
+create table role
+(
+    role_id   varchar(36)                        not null comment '角色ID'
+        primary key,
+    name varchar(50)                        not null comment '角色名称',
+    description varchar(200)                     null comment '角色描述',
+    permission JSON                             not null comment '角色权限',
+    created_at datetime default CURRENT_TIMESTAMP not null comment '创建时间',
+    updated_at datetime default CURRENT_TIMESTAMP not null on update CURRENT_TIMESTAMP comment '更新时间',
+    constraint uniq_role_name
+        unique (name)
+)
+    comment '角色表';
+
 create table user
 (
     user_id    varchar(36)                        not null comment '用户ID'
@@ -14,12 +30,16 @@ create table user
     username   varchar(50)                        not null comment '用户名',
     password   varchar(100)                       not null comment '密码',
     email      varchar(100)                       not null comment '邮箱',
+    phone      varchar(20)                        null comment '手机号码',
+    role_id    varchar(36)                        not null comment '角色ID',
     created_at datetime default CURRENT_TIMESTAMP not null comment '创建时间',
     updated_at datetime default CURRENT_TIMESTAMP not null on update CURRENT_TIMESTAMP comment '更新时间',
     constraint uniq_email
         unique (email),
     constraint uniq_username
-        unique (username)
+        unique (username),
+    constraint fk_user_role
+        foreign key (role_id) references role (role_id)
 )
     comment '用户表';
 
