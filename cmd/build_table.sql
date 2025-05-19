@@ -7,7 +7,22 @@ create table t_promotions
     is_active    tinyint(1) default 1 null
 );
 
-
+create table permission
+(
+    permission_id varchar(36)                                not null comment '权限ID' -- 0 不可查看 1 可查看， 2 可修改， 3 可删除
+        primary key,
+    cart_permission     tinyint default 0                   not null comment '购物车管理权限',
+    order_permission    tinyint default 0                   not null comment '订单管理权限',
+    product_permission  tinyint default 0                   not null comment '商品管理权限',
+    address_permission  tinyint default 0                   not null comment '地址管理权限',
+    review_permission   tinyint default 0                   not null comment '评论管理权限',
+    favorite_permission tinyint default 0                   not null comment '收藏管理权限',
+    role_permission     tinyint default 0                   not null comment '角色管理权限',
+    user_permission     tinyint default 0                   not null comment '用户管理权限',
+    created_at    datetime default CURRENT_TIMESTAMP not null comment '创建时间',
+    updated_at    datetime default CURRENT_TIMESTAMP not null on update CURRENT_TIMESTAMP comment '更新时间'
+)
+    comment '权限表';
 
 create table role
 (
@@ -15,11 +30,13 @@ create table role
         primary key,
     name varchar(50)                        not null comment '角色名称',
     description varchar(200)                     null comment '角色描述',
-    permission JSON                             not null comment '角色权限',
+    permission_id  varchar(36)                   not null comment '权限ID',
     created_at datetime default CURRENT_TIMESTAMP not null comment '创建时间',
     updated_at datetime default CURRENT_TIMESTAMP not null on update CURRENT_TIMESTAMP comment '更新时间',
     constraint uniq_role_name
-        unique (name)
+        unique (name),
+    constraint fk_role_permission
+        foreign key (permission_id) references permission (permission_id)
 )
     comment '角色表';
 

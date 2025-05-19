@@ -50,7 +50,7 @@ public class CartControllerV3 {
             if(user == null){
                 return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
             }
-            if(!roleService.verifyUserPermission(user, "cart:get")){
+            if(roleService.verifyUserPermission(user, "cart") < 1){
                 return new ResponseEntity<>(HttpStatus.FORBIDDEN);
             }
             CartResponse cart = cartService.getCart(user.getUserId());
@@ -69,7 +69,7 @@ public class CartControllerV3 {
             if (user == null) {
                return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
             }
-            if(!roleService.verifyUserPermission(user, "cart:edit")){
+            if(roleService.verifyUserPermission(user, "cart") < 2){
                 return new ResponseEntity<>(HttpStatus.FORBIDDEN);
             }
             cartService.addToCart(cartItemAddVO, user);
@@ -86,7 +86,7 @@ public class CartControllerV3 {
             if (user == null) {
                 return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
             }
-            if(!roleService.verifyUserPermission(user, "cart:edit")){
+            if(roleService.verifyUserPermission(user, "cart") < 2){
                 return new ResponseEntity<>(HttpStatus.FORBIDDEN);
             }
             cartItemService.updateCartItem(itemId, cartItemUpdateVO);
@@ -104,7 +104,7 @@ public class CartControllerV3 {
             if (user == null) {
                 return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
             }
-            if(!roleService.verifyUserPermission(user, "cart:edit")){
+            if(roleService.verifyUserPermission(user, "cart") < 2){
                 return new ResponseEntity<>(HttpStatus.FORBIDDEN);
             }
             cartItemService.deleteCartItem(itemId);

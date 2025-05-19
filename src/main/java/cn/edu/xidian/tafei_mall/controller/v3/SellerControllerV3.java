@@ -65,7 +65,7 @@ public class SellerControllerV3 {
         if (user == null) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
-        if(!roleService.verifyUserPermission(user, "product:edit")){
+        if(roleService.verifyUserPermission(user, "product") < 2){
             return new ResponseEntity<>(new MessageResponse("无权限"), HttpStatus.FORBIDDEN);
         }
         // 测试用例中没有对异常情况进行测试，这里直接返回500
@@ -84,7 +84,7 @@ public class SellerControllerV3 {
         if (user == null) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
-        if(!roleService.verifyUserPermission(user, "product:edit")){
+        if(roleService.verifyUserPermission(user, "product") < 2){
             return new ResponseEntity<>(new MessageResponse("无权限"), HttpStatus.FORBIDDEN);
         }
         ResponseEntity<addProductResponse> response;
@@ -102,7 +102,7 @@ public class SellerControllerV3 {
         if (user == null) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
-        if(!roleService.verifyUserPermission(user, "product:delete")){
+        if(roleService.verifyUserPermission(user, "product") < 2){
             return new ResponseEntity<>(new MessageResponse("无权限"), HttpStatus.FORBIDDEN);
         }
         boolean flag = productService.deleteProduct(productId, user.getUserId());
@@ -121,6 +121,9 @@ public class SellerControllerV3 {
         if (user == null) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
+        if(roleService.verifyUserPermission(user, "product") < 1){
+            return new ResponseEntity<>(new MessageResponse("无权限"), HttpStatus.FORBIDDEN);
+        }
         getProductResponse response = productService.getProductListBySeller(user.getUserId());
         return ResponseEntity.ok().body(response);
     }
@@ -134,6 +137,9 @@ public class SellerControllerV3 {
             User user = userService.getUserInfo(sessionId);
             if (user == null) {
                 return new ResponseEntity<>(new MessageResponse("用户不存在"), HttpStatus.UNAUTHORIZED);
+            }
+            if(roleService.verifyUserPermission(user, "order") < 1){
+                return new ResponseEntity<>(new MessageResponse("无权限"), HttpStatus.FORBIDDEN);
             }
             getOrderResponse response = orderService.getOrderBySeller(user.getUserId());
             return ResponseEntity.ok().body(response);
@@ -154,8 +160,7 @@ public class SellerControllerV3 {
             if (user == null) {
                 return new ResponseEntity<>(new MessageResponse("用户不存在"), HttpStatus.UNAUTHORIZED);
             }
-            if(!roleService.verifyUserPermission(user, "order:cancel")
-                    && !roleService.verifyUserPermission(user, "order:ship")){
+            if(roleService.verifyUserPermission(user, "order") < 2){
                 return new ResponseEntity<>(new MessageResponse("无权限"), HttpStatus.FORBIDDEN);
             }
             updateOrderResponse response = orderService.updateOrderBySeller(orderId, orderUpdateVO, user.getUserId());
@@ -178,7 +183,7 @@ public class SellerControllerV3 {
             if (user == null) {
                 return new ResponseEntity<>(new MessageResponse("用户不存在"), HttpStatus.UNAUTHORIZED);
             }
-            if(!roleService.verifyUserPermission(user, "report:generate")){
+            if(roleService.verifyUserPermission(user, "product") < 2){
                 return new ResponseEntity<>(new MessageResponse("无权限"), HttpStatus.FORBIDDEN);
             }
             createReportResponse response = reportService.createMonthlyReport(year, month, detail, user.getUserId());
@@ -199,7 +204,7 @@ public class SellerControllerV3 {
             if (user == null) {
                 return new ResponseEntity<>(new MessageResponse("用户不存在"), HttpStatus.UNAUTHORIZED);
             }
-            if(!roleService.verifyUserPermission(user, "promotion:edit")){
+            if(roleService.verifyUserPermission(user, "product") < 2){
                 return new ResponseEntity<>(new MessageResponse("无权限"), HttpStatus.FORBIDDEN);
             }
             createPromotionResponse response = promotionService.createPromotion(promotionCreateVO, user.getUserId());

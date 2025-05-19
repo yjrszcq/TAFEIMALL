@@ -51,7 +51,7 @@ public class ImageControllerV3 {
             if (user == null) {
                 return new ResponseEntity<>(new MessageResponse("用户不存在"), HttpStatus.UNAUTHORIZED);
             }
-            if(!roleService.verifyUserPermission(user, "product:edit")){
+            if(roleService.verifyUserPermission(user, "product") < 2){
                 return new ResponseEntity<>(new MessageResponse("无权限"), HttpStatus.FORBIDDEN);
             }
             ImageUploadResponse response = imageService.uploadToLsky(productId, image);

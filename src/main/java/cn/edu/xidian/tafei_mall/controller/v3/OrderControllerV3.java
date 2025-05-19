@@ -43,7 +43,7 @@ public class OrderControllerV3 {
             if (user == null) {
                 return new ResponseEntity<>(new MessageResponse("用户不存在"), HttpStatus.UNAUTHORIZED);
             }
-            if(!roleService.verifyUserPermission(user, "order:get")){
+            if(roleService.verifyUserPermission(user, "order") < 1){
                 return new ResponseEntity<>(new MessageResponse("无权限"), HttpStatus.FORBIDDEN);
             }
             if (orderId.equals("-1")) {
@@ -72,7 +72,7 @@ public class OrderControllerV3 {
                 return new ResponseEntity<>(new MessageResponse("未登录"), HttpStatus.UNAUTHORIZED);
             }
             User user = userService.getUserInfo(sessionId);
-            if(!roleService.verifyUserPermission(user, "order:create")){
+            if(roleService.verifyUserPermission(user, "order") < 2){
                 return new ResponseEntity<>(new MessageResponse("无权限"), HttpStatus.FORBIDDEN);
             }
             if (user == null) {
@@ -100,7 +100,7 @@ public class OrderControllerV3 {
             if (user == null) {
                 return new ResponseEntity<>(new MessageResponse("用户不存在"), HttpStatus.UNAUTHORIZED);
             }
-            if(!roleService.verifyUserPermission(user, "order:cancel")){
+            if(roleService.verifyUserPermission(user, "order") < 2){
                 return new ResponseEntity<>(new MessageResponse("无权限"), HttpStatus.FORBIDDEN);
             }
             boolean flag = orderService.cancelOrder(orderId, user.getUserId());
@@ -124,7 +124,7 @@ public class OrderControllerV3 {
             if (user == null) {
                 return new ResponseEntity<>(new MessageResponse("用户不存在"), HttpStatus.UNAUTHORIZED);
             }
-            if(!roleService.verifyUserPermission(user, "order:finish")){
+            if(roleService.verifyUserPermission(user, "order") < 2){
                 return new ResponseEntity<>(new MessageResponse("无权限"), HttpStatus.FORBIDDEN);
             }
             boolean flag = orderService.confirmOrder(orderId, user.getUserId());

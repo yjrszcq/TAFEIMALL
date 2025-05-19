@@ -50,7 +50,7 @@ public class UserControllerV3 {
             if(user == null){
                 return new ResponseEntity<>(new AddressResponse("用户不存在"), HttpStatus.BAD_REQUEST);
             }
-            if(!roleService.verifyUserPermission(user, "address:edit")){
+            if(roleService.verifyUserPermission(user, "address") < 2){
                 return new ResponseEntity<>(new AddressResponse("没有权限"), HttpStatus.FORBIDDEN);
             }
             addressService.addAddress(addressUpdate, sessionId);
@@ -70,7 +70,7 @@ public class UserControllerV3 {
             if(user == null){
                 return new ResponseEntity<>(new AddressResponse("用户不存在"), HttpStatus.BAD_REQUEST);
             }
-            if(!roleService.verifyUserPermission(user, "address:get")){
+            if(roleService.verifyUserPermission(user, "address") < 1){
                 return new ResponseEntity<>(new AddressResponse("没有权限"), HttpStatus.FORBIDDEN);
             }
             getAddressResponse res = addressService.getAddress(sessionId);
@@ -91,7 +91,7 @@ public class UserControllerV3 {
             if(user == null){
                 return new ResponseEntity<>(new AddressResponse("用户不存在"), HttpStatus.BAD_REQUEST);
             }
-            if(!roleService.verifyUserPermission(user, "address:edit")){
+            if(roleService.verifyUserPermission(user, "address") < 2){
                 return new ResponseEntity<>(new AddressResponse("没有权限"), HttpStatus.FORBIDDEN);
             }
             addressService.updateAddress(addressUpdate, sessionId, addressId);
@@ -112,7 +112,7 @@ public class UserControllerV3 {
             if(user == null){
                 return new ResponseEntity<>(new AddressResponse("用户不存在"), HttpStatus.BAD_REQUEST);
             }
-            if(!roleService.verifyUserPermission(user, "address:edit")){
+            if(roleService.verifyUserPermission(user, "address") < 2){
                 return new ResponseEntity<>(new AddressResponse("没有权限"), HttpStatus.FORBIDDEN);
             }
             addressService.deleteAddress(addressId, sessionId);
@@ -141,7 +141,7 @@ public class UserControllerV3 {
             if(user == null){
                 return new ResponseEntity<>(new AddressResponse("用户不存在"), HttpStatus.BAD_REQUEST);
             }
-            if(!roleService.verifyUserPermission(user, "favorite:edit")){
+            if(roleService.verifyUserPermission(user, "favorite") < 2){
                 return new ResponseEntity<>(new AddressResponse("没有权限"), HttpStatus.FORBIDDEN);
             }
             favoriteService.addFavorite(favoriteAddVO, sessionId);
@@ -170,7 +170,7 @@ public class UserControllerV3 {
             if(user == null){
                 return new ResponseEntity<>(new AddressResponse("用户不存在"), HttpStatus.BAD_REQUEST);
             }
-            if(!roleService.verifyUserPermission(user, "favorite:edit")){
+            if(roleService.verifyUserPermission(user, "favorite") < 2){
                 return new ResponseEntity<>(new AddressResponse("没有权限"), HttpStatus.FORBIDDEN);
             }
             favoriteService.removeFavorite(favoriteAddVO, sessionId);
@@ -201,7 +201,7 @@ public class UserControllerV3 {
             if(user == null){
                 return new ResponseEntity<>(new AddressResponse("用户不存在"), HttpStatus.BAD_REQUEST);
             }
-            if(!roleService.verifyUserPermission(user, "favorite:get")){
+            if(roleService.verifyUserPermission(user, "favorite") < 1){
                 return new ResponseEntity<>(new AddressResponse("没有权限"), HttpStatus.FORBIDDEN);
             }
             getFavoritesResponse response = favoriteService.getFavorites(sessionId, page, limit);

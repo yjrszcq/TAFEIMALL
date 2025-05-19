@@ -52,7 +52,7 @@ public class PayControllerV3 {
             if (user == null) {
                 return ResponseEntity.status(401).body("用户不存在");
             }
-            if(!roleService.verifyUserPermission(user, "order:pay")){
+            if(roleService.verifyUserPermission(user, "order") < 2){
                 return new ResponseEntity<>(new MessageResponse("无权限"), HttpStatus.FORBIDDEN);
             }
             // 创建支付订单

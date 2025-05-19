@@ -32,9 +32,9 @@ public class Role implements Serializable {
     @TableField("description")
     private String description;
 
-    @ApiModelProperty("角色权限")
-    @TableField("permission")
-    private RolePermission permission;
+    @ApiModelProperty("权限ID")
+    @TableField("permission_id")
+    private String permissionId;
 
     @ApiModelProperty("创建时间")
     @TableField("created_at")

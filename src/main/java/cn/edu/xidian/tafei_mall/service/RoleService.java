@@ -4,13 +4,16 @@ import cn.edu.xidian.tafei_mall.model.entity.User;
 import cn.edu.xidian.tafei_mall.model.vo.Response.Role.createRoleResponse;
 import cn.edu.xidian.tafei_mall.model.vo.Response.Role.getRoleResponse;
 import cn.edu.xidian.tafei_mall.model.vo.RoleCreateVO;
+import cn.edu.xidian.tafei_mall.model.vo.RolePermissionVO;
+import cn.edu.xidian.tafei_mall.model.vo.RoleUpdateVO;
 
 public interface RoleService {
-    boolean verifyUserPermission(String userId, String permissionKey) throws NoSuchFieldException, IllegalAccessException;
-    boolean verifyUserPermission(User user, String permissionKey) throws NoSuchFieldException, IllegalAccessException;
+    int verifyUserPermission(String userId, String permissionKey);
+    int verifyUserPermission(User user, String permissionKey);
     getRoleResponse getRole();
     getRoleResponse getRole(String roleId);
     createRoleResponse createRole(RoleCreateVO roleCreateVO);
-    boolean updateRole(RoleCreateVO roleVO, String roleId);
+    boolean updateRole(RoleUpdateVO roleUpdateVO, String roleId);
+    boolean updateRolePermission(RolePermissionVO rolePermissionVO, String roleId);
     boolean deleteRole(String roleId);
 }
