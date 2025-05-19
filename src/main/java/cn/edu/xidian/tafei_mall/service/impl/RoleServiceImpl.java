@@ -10,6 +10,7 @@ import cn.edu.xidian.tafei_mall.model.vo.Response.Role.PermissionResponse;
 import cn.edu.xidian.tafei_mall.model.vo.Response.Role.RoleResponse;
 import cn.edu.xidian.tafei_mall.model.vo.Response.Role.createRoleResponse;
 import cn.edu.xidian.tafei_mall.model.vo.Response.Role.getRoleResponse;
+import cn.edu.xidian.tafei_mall.model.vo.RoleChangeVO;
 import cn.edu.xidian.tafei_mall.model.vo.RoleCreateVO;
 import cn.edu.xidian.tafei_mall.model.vo.RolePermissionVO;
 import cn.edu.xidian.tafei_mall.model.vo.RoleUpdateVO;
@@ -115,6 +116,24 @@ public class RoleServiceImpl extends ServiceImpl<RoleMapper, Role> implements Ro
                 permission.getUserPermission());
         roleResponses.add(new RoleResponse(role.getRoleId(), role.getName(), role.getDescription(), permissionResponse));
         return new getRoleResponse(roleResponses);
+    }
+
+    @Override
+    public void changeUserRole(RoleChangeVO roleChangeVO, String userId, String operatorId){
+        User user = userMapper.selectById(userId);
+        if (user == null){
+            throw new IllegalArgumentException("User not found");
+        }
+        if (userId.equals(operatorId)){
+            throw new IllegalArgumentException("Cannot change your own role");
+        }
+        Role role = roleMapper.selectById(roleChangeVO.getRoleId());
+        if (role == null){
+            throw new IllegalArgumentException("Role not found");
+        }
+        user.setRoleId(roleChangeVO.getRoleId());
+        user.setUpdatedAt(LocalDateTime.now());
+        userMapper.updateById(user);
     }
 
     @Override

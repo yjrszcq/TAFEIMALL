@@ -4,6 +4,7 @@ import cn.edu.xidian.tafei_mall.model.entity.User;
 import cn.edu.xidian.tafei_mall.model.vo.Response.Order.MessageResponse;
 import cn.edu.xidian.tafei_mall.model.vo.Response.Role.createRoleResponse;
 import cn.edu.xidian.tafei_mall.model.vo.Response.Role.getRoleResponse;
+import cn.edu.xidian.tafei_mall.model.vo.RoleChangeVO;
 import cn.edu.xidian.tafei_mall.model.vo.RoleCreateVO;
 import cn.edu.xidian.tafei_mall.model.vo.RolePermissionVO;
 import cn.edu.xidian.tafei_mall.model.vo.RoleUpdateVO;
@@ -40,6 +41,27 @@ public class RoleController {
         }
     }
 
+    @PostMapping("/change")
+    public ResponseEntity<?> changeRole(@RequestHeader("Session-Id") String sessionId,
+                                        @RequestParam String userId,
+                                        @RequestBody RoleChangeVO roleChangeVO) {
+        try {
+            if (sessionId == null || sessionId.isEmpty()) {
+                return ResponseEntity.badRequest().body(new MessageResponse("Session-Id不能为空"));
+            }
+            User user = userService.getUserInfo(sessionId);
+            if (user == null) {
+                return ResponseEntity.badRequest().body(new MessageResponse("用户不存在"));
+            }
+            if (roleService.verifyUserPermission(user, "role") < 2) {
+                return ResponseEntity.status(HttpStatus.FORBIDDEN).body(new MessageResponse("没有权限"));
+            }
+            roleService.changeUserRole(roleChangeVO, userId, user.getUserId());
+            return ResponseEntity.ok(new MessageResponse("角色变更成功"));
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(new MessageResponse(e.getMessage()));
+        }
+    }
     @PostMapping("/create")
     public ResponseEntity<?> createRole(@RequestHeader("Session-Id") String sessionId,
                                         @RequestBody RoleCreateVO roleCreateVO) {
