@@ -2,6 +2,7 @@ package cn.edu.xidian.tafei_mall.controller.v2;
 
 
 import cn.edu.xidian.tafei_mall.model.entity.User;
+import cn.edu.xidian.tafei_mall.model.vo.PayCreateVO;
 import cn.edu.xidian.tafei_mall.model.vo.Response.Order.MessageResponse;
 import cn.edu.xidian.tafei_mall.model.vo.Response.Payment.alipayResponse;
 import cn.edu.xidian.tafei_mall.model.vo.Response.Payment.createPaymentResponse;
@@ -19,6 +20,7 @@ import org.springframework.web.bind.annotation.*;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 @RestController
@@ -49,7 +51,9 @@ public class PayControllerV2 {
                 return ResponseEntity.status(401).body("用户不存在");
             }
             // 创建支付订单
-            createPaymentResponse response = payService.createPayOrder(orderId, user.getUserId());
+            PayCreateVO payCreateVO = new PayCreateVO();
+            payCreateVO.setOrderIds(List.of(orderId));
+            createPaymentResponse response = payService.createPayOrder(payCreateVO, user.getUserId());
             // 直接将html表单（支付宝官方支付页面）返回给浏览器
             httpResponse.setContentType("text/html;charset=" + response.getCharset());
             httpResponse.getWriter().write(response.getForm());
@@ -196,7 +200,9 @@ public class PayControllerV2 {
     public ResponseEntity<?> createOrderTest(HttpServletResponse httpResponse){
         try {
             // 这里可以调用订单服务来创建订单（手动填写 OrderId 和 UserId）
-            createPaymentResponse response = payService.createPayOrder("fc0246b3-97b5-4636-8a85-b53c95fa9da2", "92fca2bc-c9b4-477b-8c06-a82576ddadc5");
+            PayCreateVO payCreateVO = new PayCreateVO();
+            payCreateVO.setOrderIds(List.of("fc0246b3-97b5-4636-8a85-b53c95fa9da2"));
+            createPaymentResponse response = payService.createPayOrder(payCreateVO, "92fca2bc-c9b4-477b-8c06-a82576ddadc5");
             // 直接将html表单（支付宝官方支付页面）返回给浏览器
             httpResponse.setContentType("text/html;charset=" + response.getCharset());
             httpResponse.getWriter().write(response.getForm());

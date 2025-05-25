@@ -46,6 +46,10 @@ public class Order implements Serializable {
     @TableField("total_amount")
     private BigDecimal totalAmount;
 
+    @ApiModelProperty("账单ID")
+    @TableField("bill_id")
+    private String billId;
+
     @ApiModelProperty("支付方式")
     @TableField("payment_method")
     private String paymentMethod;

@@ -2,7 +2,12 @@
 package cn.edu.xidian.tafei_mall.service.impl;
 
 
+import cn.edu.xidian.tafei_mall.mapper.BillMapper;
+import cn.edu.xidian.tafei_mall.mapper.OrderMapper;
+import cn.edu.xidian.tafei_mall.model.entity.Bill;
+import cn.edu.xidian.tafei_mall.model.entity.CartItem;
 import cn.edu.xidian.tafei_mall.model.entity.Order;
+import cn.edu.xidian.tafei_mall.model.vo.PayCreateVO;
 import cn.edu.xidian.tafei_mall.model.vo.Response.Payment.createPaymentResponse;
 import cn.edu.xidian.tafei_mall.model.vo.Response.Payment.alipayResponse;
 import cn.edu.xidian.tafei_mall.service.OrderService;
@@ -14,6 +19,7 @@ import com.alipay.api.DefaultAlipayClient;
 import com.alipay.api.internal.util.AlipaySignature;
 import com.alipay.api.request.AlipayTradePagePayRequest;
 import com.alipay.api.response.AlipayTradePagePayResponse;
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import jakarta.annotation.PreDestroy;
 import lombok.Getter;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,6 +28,8 @@ import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 import com.alibaba.fastjson.JSONObject;
 
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.*;
 import java.util.concurrent.*;
 
@@ -32,6 +40,10 @@ public class PayServiceImpl implements PayService {
     private OrderService orderService;
     @Autowired
     private Alipay alipay;
+    @Autowired
+    private OrderMapper orderMapper;
+    @Autowired
+    private BillMapper billMapper;
 
     // 定时任务线程池
     private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(4);
@@ -44,22 +56,51 @@ public class PayServiceImpl implements PayService {
     }
 
     @Override
-    public createPaymentResponse createPayOrder(String orderId, String userId) {
-        Order order = orderService.getOrderById(orderId);
-        if (order == null) {
-            throw new RuntimeException("订单不存在");
+    public createPaymentResponse createPayOrder(PayCreateVO payCreateVO, String userId) {
+        List<String> orderIds = payCreateVO.getOrderIds();
+        if (orderIds == null || orderIds.isEmpty()) {
+            throw new RuntimeException("订单列表不能为空");
         }
-        if (!order.getUserId().equals(userId)) {
-            throw new RuntimeException("用户不匹配");
+        List<Order> orders = new ArrayList<>();
+        List<Map<String, String>> orderErrors = new ArrayList<>();
+        boolean flag = true;
+        for(String orderId : orderIds){
+            Order order = orderService.getOrderById(orderId);
+            if (order == null) {
+                orderErrors.add(new HashMap<>() {{put("orderId", orderId);put("error", "订单不存在");}});
+                flag = false;
+            }
+            if (!order.getUserId().equals(userId)) {
+                orderErrors.add(new HashMap<>() {{put("orderId", orderId);put("error", "用户不匹配");}});
+                flag = false;
+            }
+            if (order.getStatus().equals("paid")) {
+                orderErrors.add(new HashMap<>() {{put("orderId", orderId);put("error", "订单已支付");}});
+                flag = false;
+            } else if (order.getStatus().equals("cancelled")) {
+                orderErrors.add(new HashMap<>() {{put("orderId", orderId);put("error", "订单已取消");}});
+                flag = false;
+            }
+            orders.add(order);
         }
-        if (order.getStatus().equals("paid")) {
-            throw new RuntimeException("订单已支付");
-        } else if (order.getStatus().equals("cancelled")) {
-            throw new RuntimeException("订单已取消");
+        if (!flag) {
+            throw new RuntimeException("订单验证失败：" + orderErrors);
         }
+        Bill bill = new Bill();
+        bill.setBillId(UUID.randomUUID().toString());
+        bill.setUserId(userId);
+        bill.setStatus("unpaid");
+        BigDecimal totalAmount = BigDecimal.ZERO;
+        for(Order order : orders){
+            totalAmount = totalAmount.add(order.getTotalAmount());
+            order.setBillId(bill.getBillId());
+            orderMapper.updateById(order);
+        }
+        bill.setTotalAmount(totalAmount);
+        billMapper.insert(bill);
         try {
-            AlipayTradePagePayResponse response = alipay.pay(order.getOrderId(), order.getTotalAmount().doubleValue(), "测试商品", "FAST_INSTANT_TRADE_PAY");
-            scheduleCancelTask(orderId); // 启动超时任务
+            AlipayTradePagePayResponse response = alipay.pay(bill.getBillId(), bill.getTotalAmount().doubleValue(), "测试商品", "FAST_INSTANT_TRADE_PAY");
+            scheduleCancelTask(bill.getBillId()); // 启动超时任务
             return new createPaymentResponse(response.getBody(), alipay.getCHAR_SET());
         } catch (AlipayApiException e) {
             throw new RuntimeException(e);
@@ -92,20 +133,43 @@ public class PayServiceImpl implements PayService {
                 if("TRADE_SUCCESS".equals(result.get("trade_status"))){ // 付款成功
                     // 注意：
                     // 付款完成后，支付宝系统发送该交易状态通知
+                    // 校验账单
+                    Bill bill = billMapper.selectById("out_trade_no");
+                    if (bill == null) {
+                        throw new RuntimeException("账单不存在");
+                    }
+                    if (!bill.getStatus().equals("unpaid")) {
+                        throw new RuntimeException("账单状态异常");
+                    }
+                    if (Math.abs(bill.getTotalAmount().doubleValue() - Double.parseDouble(result.get("total_amount"))) > 0.01) {
+                        throw new RuntimeException("账单金额不匹配");
+                    }
                     // 校验订单
-                    Order order = orderService.getOrderById(result.get("out_trade_no"));
-                    if (order == null) {
+                    List<Order> orders = orderMapper.selectList(new QueryWrapper<Order>().eq("bill_id", bill.getBillId()));
+                    if (orders == null || orders.isEmpty()) {
                         throw new RuntimeException("订单不存在");
                     }
-                    if (order.getStatus().equals("paid")) {
-                        throw new RuntimeException("订单已支付");
-                    } else if (order.getStatus().equals("cancelled")) {
-                        throw new RuntimeException("订单已取消");
+                    boolean flag = true;
+                    List<Map<String, String>> orderErrors = new ArrayList<>();
+                    for(Order order : orders){
+                        if (order.getStatus().equals("paid")) {
+                            orderErrors.add(new HashMap<>() {{put("orderId", order.getOrderId());put("error", "订单已支付");}});
+                            flag = false;
+                        } else if (order.getStatus().equals("cancelled")) {
+                            orderErrors.add(new HashMap<>() {{put("orderId", order.getOrderId());put("error", "订单已取消");}});
+                            flag = false;
+                        }
                     }
-                    if (Math.abs(order.getTotalAmount().doubleValue() - Double.parseDouble(result.get("total_amount"))) > 0.01) {
-                        throw new RuntimeException("订单金额不匹配");
+                    if (!flag) {
+                        throw new RuntimeException("订单验证失败：" + orderErrors);
                     }
-                    orderService.updateOrderStatus(order.getOrderId(), "paid");
+                    for(Order order : orders){
+                        orderService.updateOrderStatus(order.getOrderId(), "paid");
+                    }
+                    bill.setPaymentMethod("alipay");
+                    bill.setStatus("paid");
+                    bill.setPaidAt(LocalDateTime.now());
+                    billMapper.updateById(bill);
                     cancelExistingTask(result.get("out_trade_no")); // 取消对应的超时任务
                     System.out.println("付款成功");
                 } else if("TRADE_FINISHED".equals(result.get("trade_status"))){ // 交易已完成

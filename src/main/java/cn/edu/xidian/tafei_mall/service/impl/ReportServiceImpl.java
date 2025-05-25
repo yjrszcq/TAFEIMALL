@@ -50,6 +50,9 @@ public class ReportServiceImpl implements ReportService {
         Map<String, List<OrderItem>> OrderItemsMap = new HashMap<>();
         double totalSales = 0;
         for (Order order : orders) {
+            if (!order.getStatus().equals("finished")){
+                continue;
+            }
             List<OrderItem> orderItems = orderItemMapper.selectList(new QueryWrapper<OrderItem>().eq("order_id", order.getOrderId()));
             if (orderItems == null || orderItems.isEmpty()) {
                 continue;

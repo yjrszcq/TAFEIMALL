@@ -132,6 +132,7 @@ create table t_order
     seller_id           varchar(36)                           not null,
     total_amount        decimal(10, 2)                        null comment '总金额',
     payment_method      varchar(20)                           null comment '支付方式',
+    bill_id             varchar(36)                           null comment '账单ID',
     shipping_address_id varchar(36)                           not null comment '收货地址ID',
     status              varchar(20) default 'pending'         not null comment '订单状态',
     tracking_number      varchar(50)                           null comment '快递单号',
@@ -142,7 +143,9 @@ create table t_order
     constraint fk_order_seller
         foreign key (seller_id) references user (user_id),
     constraint fk_order_user
-        foreign key (user_id) references user (user_id)
+        foreign key (user_id) references user (user_id),
+    constraint fk_order_bill
+        foreign key (bill_id) references bill (bill_id)
 )
     comment '订单表';
 
@@ -212,3 +215,16 @@ create table t_user_favorites
         foreign key (product_id) references product (product_id)
 );
 
+create table bill
+(
+    bill_id      varchar(36)                        not null comment '账单ID'
+        primary key,
+    user_id      varchar(36)                        not null comment '买家ID',
+    total_amount decimal(10, 2)                     not null comment '总金额',
+    payment_method      varchar(20)                 null comment '支付方式',
+    status       varchar(20) default 'unpaid'       not null comment '账单状态',
+    created_at   datetime default CURRENT_TIMESTAMP not null comment '创建时间',
+    pay_at       datetime default CURRENT_TIMESTAMP null comment '支付时间',
+    constraint fk_bill_user
+        foreign key (user_id) references user (user_id)
+);

@@ -2,6 +2,7 @@ package cn.edu.xidian.tafei_mall.controller.v1;
 
 
 import cn.edu.xidian.tafei_mall.model.entity.User;
+import cn.edu.xidian.tafei_mall.model.vo.PayCreateVO;
 import cn.edu.xidian.tafei_mall.service.PayService;
 import cn.edu.xidian.tafei_mall.service.UserService;
 import cn.hutool.json.JSONUtil;
@@ -11,6 +12,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.net.URI;
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/v1/payment")
@@ -42,7 +44,9 @@ public class PayController {
             return ResponseEntity.status(401).body("用户不存在");
         }
         // 这里可以调用订单服务来创建订单
-        payService.createPayOrder(orderId, user.getUserId());
+        PayCreateVO payCreateVO = new PayCreateVO();
+        payCreateVO.setOrderIds(List.of(orderId));
+        payService.createPayOrder(payCreateVO, user.getUserId());
         // 假设创建订单成功，返回201 Created
         return ResponseEntity.created(URI.create("")).build();
     }
