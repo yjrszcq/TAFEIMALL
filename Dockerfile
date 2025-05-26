@@ -14,7 +14,7 @@ RUN cp src/main/resources/application-docker.yaml src/main/resources/application
 
 RUN mvn dependency:go-offline
 
-# 复制源代码并构建项目
+# 构建项目
 RUN mvn clean package -DskipTests
 
 # 运行时镜像
