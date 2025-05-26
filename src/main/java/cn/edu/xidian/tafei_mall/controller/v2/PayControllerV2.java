@@ -136,11 +136,11 @@ public class PayControllerV2 {
 
     private static String returnPage(String redirectUrl, int flag){
         String result = switch (flag) {
-            case 0 -> "购买失败，请稍后再试";
-            case 1 -> "等待扣款结果";
-            case 2 -> "购买成功，感谢您的惠顾";
-            case -1 -> "发生错误，若果您已支付，请联系客服";
-            default -> "未知错误";
+            case 0 -> "Purchase failed, please try again later.";
+            case 1 -> "Waiting for payment processing.";
+            case 2 -> "Purchase succeed, thank you for your business!";
+            case -1 -> "An error occurred. If payment was made, please contact support.";
+            default -> "Unknown error.";
         };
         return "<!DOCTYPE html>" +
                 "<html>" +
@@ -172,8 +172,8 @@ public class PayControllerV2 {
                 "</head>" +
                 "<body>" +
                 "    <div class=\"message-box\">" +
-                "        <p>" + result + "，<span id=\"countdown\">3</span>秒后返回首页</p>" +
-                "        <p>如果超时未返回，请<a href=\"" + redirectUrl + "\">点击此处</a>跳转页面</p>" +
+                "        <p>" + result + " Returning to homepage in <span id=\"countdown\">3</span> s.</p>" +
+                "        <p>If not redirected automatically, please <a href=\"" + redirectUrl + "\">click here</a>.</p>" +
                 "    </div>" +
                 "    <script>" +
                 "        let seconds = 3;" +
