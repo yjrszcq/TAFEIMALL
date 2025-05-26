@@ -16,14 +16,8 @@ RUN mkdir -p Config && \
     echo "  baseURL: \"${HTTP_BASE_URL}\"" >> Config/application.yaml && \
     echo "  timeout: ${HTTP_TIMEOUT}" >> Config/application.yaml
 
-# 复制 package.json 和 package-lock.json (或 yarn.lock)
-COPY package*.json ./
-
 # 安装项目依赖 (使用 npm 或 yarn)，同时清除 npm 缓存
 RUN npm install --no-audit --no-fund --cache /tmp/npm-cache && npm cache clean --force
-
-# 复制整个项目源代码
-COPY . .
 
 # 构建 Vue 应用
 RUN npm run build

@@ -12,12 +12,9 @@ WORKDIR /app
 # 应用docker配置文件
 RUN cp src/main/resources/application-docker.yaml src/main/resources/application.yaml
 
-# 复制pom.xml并下载依赖
-COPY pom.xml .
 RUN mvn dependency:go-offline
 
 # 复制源代码并构建项目
-COPY src ./src
 RUN mvn clean package -DskipTests
 
 # 运行时镜像
