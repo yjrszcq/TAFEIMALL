@@ -1,5 +1,8 @@
 FROM node:slim AS builder
 
+ARG HTTP_BASE_URL=http://localhost:8080
+ARG HTTP_TIMEOUT=5000
+
 RUN apt-get update && \
     apt-get install -y git && \
     git clone https://github.com/rouwanyuanyuanyuan/myshoppingmall.git /app && \
@@ -10,8 +13,8 @@ WORKDIR /app
 
 RUN mkdir -p Config && \
     echo "http:" > Config/application.yaml && \
-    echo "  baseURL: \"\${HTTP_BASE_URL}\"" >> Config/application.yaml && \
-    echo "  timeout: \${HTTP_TIMEOUT}" >> Config/application.yaml
+    echo "  baseURL: \"${HTTP_BASE_URL}\"" >> Config/application.yaml && \
+    echo "  timeout: ${HTTP_TIMEOUT}" >> Config/application.yaml
 
 # 安装项目依赖 (使用 npm 或 yarn)，同时清除 npm 缓存
 RUN npm install --no-audit --no-fund --cache /tmp/npm-cache && npm cache clean --force
