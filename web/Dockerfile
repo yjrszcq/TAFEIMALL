@@ -1,8 +1,5 @@
 FROM node:slim AS builder
 
-ARG HTTP_BASE_URL=http://api.tafei-mall.szcq.top
-ARG HTTP_TIMEOUT=5000
-
 RUN apt-get update && \
     apt-get install -y git && \
     git clone https://github.com/rouwanyuanyuanyuan/myshoppingmall.git /app && \
